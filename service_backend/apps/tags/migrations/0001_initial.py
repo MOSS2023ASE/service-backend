@@ -9,36 +9,33 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('users', '__first__'),
-        ('years', '__first__'),
+        ('issues', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Subject',
+            name='Tag',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(db_index=True, max_length=255, unique=True)),
-                ('content', models.TextField()),
-                ('year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='years.year')),
+                ('content', models.CharField(max_length=255)),
             ],
             options={
-                'db_table': 'subjects',
+                'db_table': 'tags',
             },
         ),
         migrations.CreateModel(
-            name='UserSubject',
+            name='IssueTag',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('subject', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_subjects', to='subjects.subject')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='users', to='users.user')),
+                ('issue', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='issues.issue')),
+                ('tag', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tags.tag')),
             ],
             options={
-                'db_table': 'user_subjects',
+                'db_table': 'issue_tags',
             },
         ),
     ]
