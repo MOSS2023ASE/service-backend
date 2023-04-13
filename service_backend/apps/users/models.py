@@ -17,11 +17,11 @@ class User(MyModel):
 
 class Privilege(MyModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='privileges')
-    statistics = models.IntegerField()
-    delete = models.IntegerField()
-    report = models.IntegerField()
-    frozen = models.IntegerField()
-    user_role = models.IntegerField()
+    statistics = models.IntegerField(default=0)
+    delete = models.IntegerField(default=0)
+    report = models.IntegerField(default=0)
+    frozen = models.IntegerField(default=0)
+    user_role = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'privileges'
