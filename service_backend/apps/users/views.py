@@ -9,10 +9,11 @@ from service_backend.apps.utils.constants import UserErrorCode
 class UserLogin(APIView):
     def post(self, request):
         # get user
+        print(1234)
+        print(request.data)
         try:
-            user = User(student_id=request.data['student_id'])
-            if not user:
-                raise Exception()
+            # if no invalid id, User.objects.get will raise exception
+            user = User.objects.get(student_id=request.data['student_id'])
         except Exception as e:
             return Response(
                 response_json(
