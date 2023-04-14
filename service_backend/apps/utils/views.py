@@ -70,7 +70,7 @@ def check_privilege(role_list: list):
                 return Response(response)
             # check authority
             privilege = Privilege.objects.get(user_id=user_id)
-            if privilege.id and privilege.frozen:   # have privilege and not frozen
+            if privilege.id and privilege.frozen:   # have privilege and frozen
                 return Response(response_json(
                     success=False,
                     code=UserErrorCode.USER_FROZEN,
