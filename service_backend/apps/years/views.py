@@ -1,3 +1,5 @@
+from functools import wraps
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from service_backend.apps.years.models import Year
@@ -7,13 +9,33 @@ from service_backend.apps.utils.constants import YearErrorCode
 
 
 # Create your views here.
+def _find_year():
+    def decorated(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                year = Year.objects.get(id=args[1].data['year_id'])
+            except Exception as e:
+                return Response(response_json(
+                    success=False,
+                    code=YearErrorCode.YEAR_DOES_NOT_EXIST,
+                    message="can't find year!"
+                ))
+            return func(*args, **kwargs, year=year)
+
+        return wrapper
+
+    return decorated
+
+
 class YearList(APIView):
-    def post(self, request):
+    def get(self, request):
         year = Year.objects.all()
         year_serializer = YearSerializer(year, many=True)
+        data = {"year_list": year_serializer.data}
         return Response(response_json(
             success=True,
-            data=year_serializer.data
+            data=data
         ))
 
 
@@ -36,24 +58,16 @@ class YearCreate(APIView):
 
 
 class YearUpdate(APIView):
-    def post(self, request):
-        try:
-            print(request.data['year_id'])
-            year = Year.objects.get(id=request.data['year_id'])
-        except Exception as _e:
-            return Response(response_json(
-                success=False,
-                code=YearErrorCode.YEAR_DOES_NOT_EXIST,
-                message="can't find year!"
-            ))
+    @_find_year()
+    def post(self, request, year=None):
         year.content = request.data['content']
         try:
             year.save()
-        except Exception as _e:
+        except Exception as e:
             return Response(response_json(
                 success=False,
                 code=YearErrorCode.YEAR_SAVE_FAILED,
-                message="can't save year!"
+                message="can't update year!"
             ))
         return Response(response_json(
             success=True,
@@ -62,15 +76,8 @@ class YearUpdate(APIView):
 
 
 class YearDelete(APIView):
-    def post(self, request):
-        try:
-            year = Year.objects.get(id=request.data['year_id'])
-        except Exception as _e:
-            return Response(response_json(
-                success=False,
-                code=YearErrorCode.YEAR_DOES_NOT_EXIST,
-                message="can't find year!"
-            ))
+    @_find_year()
+    def delete(self, request, year):
         try:
             year.delete()
         except Exception as _e:
