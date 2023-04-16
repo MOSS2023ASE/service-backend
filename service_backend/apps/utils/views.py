@@ -1,5 +1,5 @@
 from service_backend.apps.utils.constants import GlobalCode, UserErrorCode
-from service_backend.apps.users.models import Privilege
+from service_backend.apps.users.models import User
 from service_backend.settings import ENV
 from rest_framework.response import Response
 from datetime import datetime
@@ -59,7 +59,7 @@ def check_jwt(f):
     return wrapper
 
 
-def check_privilege(role_list: list):
+def check_role(role_list: list):
     def decorated(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
@@ -69,15 +69,14 @@ def check_privilege(role_list: list):
             if not user_id:
                 return Response(response)
             # check authority
-            privilege = Privilege.objects.get(user_id=user_id)
-            if privilege.id and privilege.frozen:   # have privilege and frozen
+            user = User.objects.get(user_id=user_id)
+            if user.id and user.frozen:   # have such user and frozen
                 return Response(response_json(
                     success=False,
                     code=UserErrorCode.USER_FROZEN,
                     message='your account has been frozen, please contact administrator!'
                 ))
-            # print(privilege.user_role, role_list)
-            if not privilege.id or not (privilege.user_role in role_list):
+            if not user.id or not (user.user_role in role_list):
                 return Response(response_json(
                     success=False,
                     code=UserErrorCode.PERMISSION_DENIED,

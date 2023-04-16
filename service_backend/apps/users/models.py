@@ -10,18 +10,8 @@ class User(MyModel):
     password_digest = models.CharField(max_length=255)
     mail = models.EmailField()
     avatar = models.CharField(max_length=255)
-
-    class Meta:
-        db_table = 'users'
-
-
-class Privilege(MyModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='privileges')
-    statistics = models.IntegerField(default=0)
-    delete = models.IntegerField(default=0)
-    report = models.IntegerField(default=0)
     frozen = models.IntegerField(default=0)
     user_role = models.IntegerField(default=0)
 
     class Meta:
-        db_table = 'privileges'
+        db_table = 'users'
