@@ -1,16 +1,16 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from service_backend.apps.users.models import User, Privilege
+from service_backend.apps.users.models import User
 from service_backend.apps.issues.models import Issue
 from service_backend.apps.users.serializers import UserSerializer
-from service_backend.apps.utils.views import response_json, encode_password, check_privilege
+from service_backend.apps.utils.views import response_json, encode_password, check_role
 from service_backend.apps.utils.constants import UserErrorCode, UserRole, OtherErrorCode, IssueErrorCode
 
 
 # Create your views here.
 class CreateUser(APIView):
 
-    @check_privilege([UserRole.ADMIN, ])
+    @check_role([UserRole.ADMIN, ])
     def post(self, request, user_id=None):
         # create user
         try:
@@ -25,16 +25,6 @@ class CreateUser(APIView):
                 code=UserErrorCode.USER_SAVE_FAILED,
                 message="can't save user!"
             ))
-        # create privilege
-        try:
-            new_privilege = Privilege(user_id=new_user.id)
-            new_privilege.save()
-        except Exception as _e:
-            return Response(response_json(
-                success=False,
-                code=UserErrorCode.PRIVILEGE_SAVE_FAILED,
-                message="can't save privilege!"
-            ))
         # success
         return Response(response_json(
             success=True,
@@ -44,7 +34,7 @@ class CreateUser(APIView):
 
 class CreateUserBatch(APIView):
 
-    @check_privilege([UserRole.ADMIN, ])
+    @check_role([UserRole.ADMIN, ])
     def post(self, request, user_id=None):
         # print('user_id is:' + str(user_id))
         # preprocess list
@@ -64,29 +54,15 @@ class CreateUserBatch(APIView):
             try:
                 if User.objects.filter(student_id=student_id).exists():
                     user = User.objects.get(student_id=student_id)
-                    user.name, user.password_digest = name, encode_password(password)
+                    user.name, user.password_digest, user.user_role = name, encode_password(password), role
                 else:
-                    user = User(student_id=student_id, name=name, password_digest=encode_password(password))
+                    user = User(student_id=student_id, name=name, password_digest=encode_password(password), user_role=role)
                 user.save()
             except Exception as _e:
                 return Response(response_json(
                     success=False,
                     code=UserErrorCode.USER_SAVE_FAILED,
                     message="can't save user!"
-                ))
-            # create privilege
-            try:
-                if Privilege.objects.filter(user_id=user.id).exists():
-                    privilege = Privilege.objects.get(user_id=user.id)
-                    privilege.user_role = role
-                else:
-                    privilege = Privilege(user_id=user.id, user_role=role)
-                privilege.save()
-            except Exception as _e:
-                return Response(response_json(
-                    success=False,
-                    code=UserErrorCode.PRIVILEGE_SAVE_FAILED,
-                    message="can't save privilege!"
                 ))
         # success
         return Response(response_json(
@@ -97,7 +73,7 @@ class CreateUserBatch(APIView):
 
 class UserList(APIView):
 
-    @check_privilege([UserRole.ADMIN, ])
+    @check_role([UserRole.ADMIN, ])
     def post(self, request):
         pass
         # user = User.objects.all()
@@ -118,12 +94,12 @@ class UserList(APIView):
         # ))
 
 
-class UpdatePrivilege(APIView):
-    @check_privilege([UserRole.ADMIN, ])
+class UpdateUserRole(APIView):
+    @check_role([UserRole.ADMIN, ])
     def post(self, request, user_id=None):
-        # get privilege
+        # get user
         try:
-            privilege = Privilege.objects.get(id=request.data['user_id'])
+            user = User.objects.get(id=request.data['user_id'])
         except Exception as _e:
             return Response(response_json(
                 success=False,
@@ -131,15 +107,15 @@ class UpdatePrivilege(APIView):
                 message="can't find user!"
             ))
         # modify user role
-        privilege.user_role = request.data['user_role']
-        # save privilege
+        user.user_role = request.data['user_role']
+        # save user role
         try:
-            privilege.save()
+            user.save()
         except Exception as _e:
             return Response(response_json(
                 success=False,
-                code=UserErrorCode.PRIVILEGE_SAVE_FAILED,
-                message="can't save privilege!"
+                code=UserErrorCode.USER_SAVE_FAILED,
+                message="can't save user!"
             ))
         return Response(response_json(
             success=True,
@@ -148,11 +124,11 @@ class UpdatePrivilege(APIView):
 
 
 class FreezeUser(APIView):
-    @check_privilege([UserRole.ADMIN, ])
+    @check_role([UserRole.ADMIN, ])
     def post(self, request, user_id=None):
-        # get privilege
+        # get user
         try:
-            privilege = Privilege.objects.get(id=request.data['user_id'])
+            user = User.objects.get(id=request.data['user_id'])
         except Exception as _e:
             return Response(response_json(
                 success=False,
@@ -160,15 +136,15 @@ class FreezeUser(APIView):
                 message="can't find user!"
             ))
         # modify frozen status
-        privilege.frozen = request.data['frozen']
-        # save privilege
+        user.frozen = request.data['frozen']
+        # save frozen status
         try:
-            privilege.save()
+            user.save()
         except Exception as _e:
             return Response(response_json(
                 success=False,
-                code=UserErrorCode.PRIVILEGE_SAVE_FAILED,
-                message="can't save privilege!"
+                code=UserErrorCode.USER_SAVE_FAILED,
+                message="can't save user!"
             ))
         return Response(response_json(
             success=True,
@@ -178,7 +154,7 @@ class FreezeUser(APIView):
 
 class DeleteIssue(APIView):
 
-    @check_privilege([UserRole.ADMIN, ])
+    @check_role([UserRole.ADMIN, ])
     def post(self, request, user_id=None):
         try:
             issue = Issue.objects.get(id=request.data['issue_id'])
