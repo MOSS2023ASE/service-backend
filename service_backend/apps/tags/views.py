@@ -80,7 +80,7 @@ class TagUpdate(APIView):
 
 class TagDelete(APIView):
     @_find_tag()
-    def post(self, request, tag):
+    def delete(self, request, tag):
         try:
             tag.delete()
         except Exception as e:
