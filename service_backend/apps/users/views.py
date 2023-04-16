@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from service_backend.apps.users.models import User
-from service_backend.apps.utils.views import response_json, encode_password, generate_jwt
+from service_backend.apps.utils.views import response_json, encode_password, generate_jwt, check_role
 from service_backend.apps.utils.constants import UserErrorCode
 
 
@@ -45,6 +45,13 @@ class UserLogin(APIView):
         )
 
 
+class PasswordModify(APIView):
+
+    @check_role([0, 1, 2])
+    def post(self, request, action_user: User = None):
+        pass
+
+
 def init_database():
     user = User(student_id='20373743', name='ccy', password_digest=encode_password('123456'), user_role=2, frozen=0)
     user.save()
@@ -52,6 +59,5 @@ def init_database():
     user.save()
     user = User(student_id='20373044', name='xyy', password_digest=encode_password('123456'), user_role=1, frozen=0)
     user.save()
-
 
 # init_database()

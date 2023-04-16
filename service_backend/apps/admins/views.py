@@ -11,10 +11,11 @@ from service_backend.apps.utils.constants import UserErrorCode, UserRole, OtherE
 class CreateUser(APIView):
 
     @check_role([UserRole.ADMIN, ])
-    def post(self, request, user_id=None):
+    def post(self, request, action_user: User = None):
         # create user
         try:
-            student_id, name, password, role = request.data['student_id'], request.data['name'], request.data['password'], request.data['role']
+            student_id, name, password, role = request.data['student_id'], request.data['name'], request.data[
+                'password'], request.data['role']
             print(request.data)
             if User.objects.filter(student_id=student_id).exists():
                 user = User.objects.get(student_id=student_id)
@@ -40,7 +41,7 @@ class CreateUser(APIView):
 class CreateUserBatch(APIView):
 
     @check_role([UserRole.ADMIN, ])
-    def post(self, request, user_id=None):
+    def post(self, request, action_user: User = None):
         # print('user_id is:' + str(user_id))
         # preprocess list
         name_list = request.data['name_list']
@@ -62,7 +63,8 @@ class CreateUserBatch(APIView):
                     user.name, user.password_digest, user.user_role = name, encode_password(password), role
                     user.mail = user.mail if user.mail else f"{student_id}@buaa.edu.cn"
                 else:
-                    user = User(student_id=student_id, name=name, password_digest=encode_password(password), user_role=role, mail=f"{student_id}@buaa.edu.cn")
+                    user = User(student_id=student_id, name=name, password_digest=encode_password(password),
+                                user_role=role, mail=f"{student_id}@buaa.edu.cn")
                 user.save()
             except Exception as _e:
                 return Response(response_json(
@@ -102,7 +104,7 @@ class UserList(APIView):
 
 class UpdateUserRole(APIView):
     @check_role([UserRole.ADMIN, ])
-    def post(self, request, user_id=None):
+    def post(self, request, action_user: User = None):
         # get user
         try:
             user = User.objects.get(id=request.data['user_id'])
@@ -131,7 +133,7 @@ class UpdateUserRole(APIView):
 
 class FreezeUser(APIView):
     @check_role([UserRole.ADMIN, ])
-    def post(self, request, user_id=None):
+    def post(self, request, action_user: User = None):
         # get user
         try:
             user = User.objects.get(id=request.data['user_id'])
@@ -161,7 +163,7 @@ class FreezeUser(APIView):
 class DeleteIssue(APIView):
 
     @check_role([UserRole.ADMIN, ])
-    def post(self, request, user_id=None):
+    def post(self, request, action_user: User = None):
         try:
             issue = Issue.objects.get(id=request.data['issue_id'])
         except Exception as _e:
@@ -182,4 +184,3 @@ class DeleteIssue(APIView):
             success=True,
             message="delete issue success!"
         ))
-
