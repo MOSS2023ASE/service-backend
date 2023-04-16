@@ -18,8 +18,7 @@ def _find_year():
             except Exception as e:
                 return Response(response_json(
                     success=False,
-                    # TODO
-                    code=1,
+                    code=YearErrorCode.YEAR_DOES_NOT_EXIST,
                     message="can't find year!"
                 ))
             return func(*args, **kwargs, year=year)
