@@ -14,11 +14,16 @@ class CreateUser(APIView):
     def post(self, request, user_id=None):
         # create user
         try:
-            # print(request.data)
-            new_user = User(name=request.data['name'],
-                            student_id=request.data['student_id'],
-                            password_digest=encode_password(request.data['password']))
-            new_user.save()
+            student_id, name, password, role = request.data['student_id'], request.data['name'], request.data['password'], request.data['role']
+            print(request.data)
+            if User.objects.filter(student_id=student_id).exists():
+                user = User.objects.get(student_id=student_id)
+                user.name, user.password_digest, user.user_role = name, encode_password(password), role
+                user.mail = user.mail if user.mail else f"{student_id}@buaa.edu.cn"
+            else:
+                user = User(student_id=student_id, name=name, password_digest=encode_password(password), user_role=role,
+                            mail=f"{student_id}@buaa.edu.cn")
+            user.save()
         except Exception as _e:
             return Response(response_json(
                 success=False,
@@ -46,7 +51,7 @@ class CreateUserBatch(APIView):
             return Response(response_json(
                 success=False,
                 code=OtherErrorCode.UNEXPECTED_JSON_FORMAT,
-                message="inequal length of list!"
+                message="inequal list length!"
             ))
         # iterate
         for name, student_id, password, role in zip(name_list, student_id_list, password_list, role_list):
@@ -55,8 +60,9 @@ class CreateUserBatch(APIView):
                 if User.objects.filter(student_id=student_id).exists():
                     user = User.objects.get(student_id=student_id)
                     user.name, user.password_digest, user.user_role = name, encode_password(password), role
+                    user.mail = user.mail if user.mail else f"{student_id}@buaa.edu.cn"
                 else:
-                    user = User(student_id=student_id, name=name, password_digest=encode_password(password), user_role=role)
+                    user = User(student_id=student_id, name=name, password_digest=encode_password(password), user_role=role, mail=f"{student_id}@buaa.edu.cn")
                 user.save()
             except Exception as _e:
                 return Response(response_json(
@@ -75,23 +81,23 @@ class UserList(APIView):
 
     @check_role([UserRole.ADMIN, ])
     def post(self, request):
-        pass
-        # user = User.objects.all()
-        # user_serializar = UserSerializer(user, many=True)
-        # return Response(response_json(
-        #     success=True,
-        #     data={
-        #         'user_list': [
-        #             {
-        #                 'user_id': user.id,
-        #                 'student_id': user.student_id,
-        #                 'name': user.name,
-        #                 'user_role': 'oh my god QAQ' # TODO
-        #             }
-        #             for user in user_serializar.data
-        #         ]
-        #     }
-        # ))
+        user = User.objects.all()
+        user_serializar = UserSerializer(user, many=True)
+        return Response(response_json(
+            success=True,
+            data={
+                'user_list': [
+                    {
+                        'user_id': user.id,
+                        'student_id': user.student_id,
+                        'name': user.name,
+                        'user_role': user.user_role,
+                        'frozen': user.frozen
+                    }
+                    for user in user_serializar.data
+                ]
+            }
+        ))
 
 
 class UpdateUserRole(APIView):
