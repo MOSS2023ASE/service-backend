@@ -70,7 +70,7 @@ def check_role(role_list: list):
                 return Response(response)
             # check authority
             user = User.objects.get(id=user_id)
-            print(user.id, user.user_role)
+            # print(user.id, user.user_role)
             if user.id and user.frozen:   # have such user and frozen
                 return Response(response_json(
                     success=False,
@@ -83,7 +83,7 @@ def check_role(role_list: list):
                     code=UserErrorCode.PERMISSION_DENIED,
                     message='permission denied!'
                 ))
-            return f(*args, **kwargs, user_id=user_id)
+            return f(*args, **kwargs, action_user=user)
         return wrapper
     return decorated
 
