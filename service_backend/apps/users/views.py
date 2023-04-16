@@ -9,8 +9,6 @@ from service_backend.apps.utils.constants import UserErrorCode
 class UserLogin(APIView):
     def post(self, request):
         # get user
-        print(1234)
-        print(request.data)
         try:
             # if no invalid id, User.objects.get will raise exception
             user = User.objects.get(student_id=request.data['student_id'])
@@ -28,6 +26,7 @@ class UserLogin(APIView):
             if password_digest != user.password_digest:
                 raise Exception()
             jwt_token = generate_jwt(user.id)
+            print(jwt_token)
         except Exception as e:
             return Response(response_json(
                 success=False,
@@ -46,3 +45,13 @@ class UserLogin(APIView):
         )
 
 
+def init_database():
+    user = User(student_id='20373743', name='ccy', password_digest=encode_password('123456'), user_role=2, frozen=0)
+    user.save()
+    user = User(student_id='20373043', name='lsz', password_digest=encode_password('123456'), user_role=0, frozen=0)
+    user.save()
+    user = User(student_id='20373044', name='xyy', password_digest=encode_password('123456'), user_role=1, frozen=0)
+    user.save()
+
+
+# init_database()

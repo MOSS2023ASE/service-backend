@@ -5,4 +5,4 @@ from service_backend.apps.users.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'student_id', 'name', 'password_digest', 'mail', 'avatar']
+        fields = ['id', 'student_id', 'name', 'password_digest', 'mail', 'avatar', 'frozen', 'user_role']

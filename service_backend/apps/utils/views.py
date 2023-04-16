@@ -69,7 +69,8 @@ def check_role(role_list: list):
             if not user_id:
                 return Response(response)
             # check authority
-            user = User.objects.get(user_id=user_id)
+            user = User.objects.get(id=user_id)
+            print(user.id, user.user_role)
             if user.id and user.frozen:   # have such user and frozen
                 return Response(response_json(
                     success=False,
