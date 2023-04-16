@@ -49,7 +49,62 @@ class PasswordModify(APIView):
 
     @check_role([0, 1, 2])
     def post(self, request, action_user: User = None):
-        pass
+        if action_user.password_digest != encode_password(request.data['password_old']):
+            return Response(response_json(
+                success=False,
+                code=UserErrorCode.INCORRECT_PASSWORD,
+                message='incorrect password!'
+            ))
+        try:
+            action_user.password_digest = encode_password(request.data['password_new'])
+            action_user.save()
+        except Exception as _e:
+            return Response(response_json(
+                success=False,
+                code=UserErrorCode.USER_SAVE_FAILED,
+                message="can't save user!"
+            ))
+        return Response(response_json(
+            success=True,
+            message="modify password successfully!"
+        ))
+
+
+class GetUserInfo(APIView):
+
+    @check_role([0, 1, 2])
+    def post(self, request, action_user: User = None):
+        return Response(response_json(
+            success=True,
+            message='get user information successfully!',
+            data={
+                'user_id': action_user.id,
+                'student_id': action_user.student_id,
+                'name': action_user.name,
+                'mail': action_user.mail,
+                'avatar': action_user.avatar
+            }
+        ))
+
+
+class ModifyUserInfo(APIView):
+
+    @check_role([0, 1, 2])
+    def post(self, request, action_user: User = None):
+        try:
+            action_user.avatar = request.data['avatar']
+            action_user.mail = request.data['mail']
+            action_user.save()
+        except Exception as _e:
+            return Response(response_json(
+                success=False,
+                code=UserErrorCode.USER_SAVE_FAILED,
+                message="can't save user!"
+            ))
+        return Response(response_json(
+            success=True,
+            message="modify user information successfully!"
+        ))
 
 
 def init_database():
