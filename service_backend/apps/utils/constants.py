@@ -26,6 +26,16 @@ class UserErrorCode:
     PERMISSION_DENIED = 208
 
 
+class IssueErrorCode:
+    ISSUE_NOT_FOUND = 301
+    ISSUE_DELETE_FAILED = 302
+    ISSUE_SAVED_FAILED = 303
+
+
+class OtherErrorCode:
+    UNEXPECTED_JSON_FORMAT = 901
+
+
 class SubjectErrorCode:
     SUBJECT_SAVE_FAILED = 301
     SUBJECT_DOES_NOT_EXIST = 302
