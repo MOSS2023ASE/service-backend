@@ -65,10 +65,20 @@ class UserLogin(APIView):
                 success=True,
                 message='login success!',
                 data={
-                    'jwt': jwt_token
+                    'jwt': jwt_token,
+                    'role': user.user_role
                 }
             )
         )
+
+
+class UserLogout(APIView):
+    @check_role([0, 1, 2])
+    def post(self, request, action_user: User = None):
+        return Response(response_json(
+            success=True,
+            message="user logout successfully!"
+        ))
 
 
 class PasswordModify(APIView):
