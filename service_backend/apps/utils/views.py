@@ -1,5 +1,7 @@
 from service_backend.apps.utils.constants import GlobalCode, UserErrorCode
 from service_backend.apps.users.models import User
+from service_backend.apps.years.models import Year
+from service_backend.apps.subjects.models import Subject, UserSubject
 from service_backend.settings import ENV
 from rest_framework.response import Response
 from datetime import datetime
@@ -27,7 +29,7 @@ def decode_jwt(token: str) -> (int, dict):
         jwt_dict = decode(jwt=token, algorithms='HS256', key=ENV['JWT_KEY'])
         start_time = datetime.fromisoformat(jwt_dict['time'])
         seconds = (datetime.now() - start_time).seconds
-        if seconds < 3600.0:
+        if seconds < 3600000.0:     # TODO, change to 3600 when release
             user_id = jwt_dict['user_id']
         else:
             message, code = 'expired jwt token!', UserErrorCode.EXPIRED_JWT
@@ -36,8 +38,6 @@ def decode_jwt(token: str) -> (int, dict):
     if not user_id:
         response = response_json(success=False, code=code, message=message)
     return user_id, response
-
-
 
 
 def generate_jwt(user_id: int) -> str:
@@ -56,6 +56,7 @@ def check_jwt(f):
         if not user_id:
             return Response(response)
         return f(*args, **kwargs, user_id=user_id)
+
     return wrapper
 
 
@@ -71,7 +72,7 @@ def check_role(role_list: list):
             # check authority
             user = User.objects.get(id=user_id)
             # print(user.id, user.user_role)
-            if user.id and user.frozen:   # have such user and frozen
+            if user.id and user.frozen:  # have such user and frozen
                 return Response(response_json(
                     success=False,
                     code=UserErrorCode.USER_FROZEN,
@@ -84,7 +85,9 @@ def check_role(role_list: list):
                     message='permission denied!'
                 ))
             return f(*args, **kwargs, action_user=user)
+
         return wrapper
+
     return decorated
 
 
@@ -96,5 +99,30 @@ def encode_password(message: str, salt=ENV['PASSWORD_SALT']) -> str:
         h.update(h.hexdigest().encode())
     return h.hexdigest()
 
+
+def init_database():
+    User.objects.all().delete()
+    user = User(student_id='20373743', name='ccy', password_digest=encode_password('123456'), user_role=2, frozen=0)
+    user.save()
+    user = User(student_id='20373043', name='lsz', password_digest=encode_password('123456'), user_role=0, frozen=0)
+    user.save()
+    user = User(student_id='20373044', name='xyy', password_digest=encode_password('123456'), user_role=1, frozen=0)
+    user.save()
+    Year.objects.all().delete()
+    year = Year(content='2023年')
+    year.save()
+    Subject.objects.all().delete()
+    subject = Subject(name='数学分析2', content='...', year_id=1)
+    subject.save()
+    subject = Subject(name='大学物理', content='...', year_id=1)
+    subject.save()
+    UserSubject.objects.all().delete()
+    user_subject = UserSubject(user_id=3, subject_id=1)
+    user_subject.save()
+    user_subject = UserSubject(user_id=3, subject_id=2)
+    user_subject.save()
+
+
+# init_database()
 
 # print(generate_jwt(10001))
