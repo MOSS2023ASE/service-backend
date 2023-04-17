@@ -1,6 +1,9 @@
 from service_backend.apps.utils.constants import GlobalCode, UserErrorCode
 from service_backend.apps.users.models import User
+from service_backend.apps.issues.models import Issue, ReviewIssues, AdoptIssues, LikeIssues, FollowIssues
 from service_backend.apps.years.models import Year
+from service_backend.apps.chapters.models import Chapter
+from service_backend.apps.subjects.models import Subject
 from service_backend.apps.subjects.models import Subject, UserSubject
 from service_backend.settings import ENV
 from rest_framework.response import Response
@@ -102,25 +105,44 @@ def encode_password(message: str, salt=ENV['PASSWORD_SALT']) -> str:
 
 def init_database():
     User.objects.all().delete()
-    user = User(student_id='20373743', name='ccy', password_digest=encode_password('123456'), user_role=2, frozen=0)
-    user.save()
-    user = User(student_id='20373043', name='lsz', password_digest=encode_password('123456'), user_role=0, frozen=0)
-    user.save()
-    user = User(student_id='20373044', name='xyy', password_digest=encode_password('123456'), user_role=1, frozen=0)
-    user.save()
+    User.objects.bulk_create([
+        User(student_id='20373743', name='ccy', password_digest=encode_password('123456'), user_role=2, frozen=0),
+        User(student_id='20373043', name='lsz', password_digest=encode_password('123456'), user_role=0, frozen=0),
+        User(student_id='20373044', name='xyy', password_digest=encode_password('123456'), user_role=1, frozen=0),
+        User(student_id='20373045', name='xxx', password_digest=encode_password('123456'), user_role=1, frozen=0),
+    ])
     Year.objects.all().delete()
-    year = Year(content='2023年')
-    year.save()
+    Year.objects.bulk_create([Year(content='2023年')])
     Subject.objects.all().delete()
-    subject = Subject(name='数学分析2', content='...', year_id=1)
-    subject.save()
-    subject = Subject(name='大学物理', content='...', year_id=1)
-    subject.save()
+    Subject.objects.bulk_create([
+        Subject(name='数学分析2', content='...', year_id=1),
+        Subject(name='大学物理', content='...', year_id=1),
+    ])
+    Chapter.objects.all().delete()
+    Chapter.objects.bulk_create([
+        Chapter(subject_id=1, name='多元函数求导', content='hh'),
+        Chapter(subject_id=2, name='角动量', content='hhh'),
+    ])
     UserSubject.objects.all().delete()
-    user_subject = UserSubject(user_id=3, subject_id=1)
-    user_subject.save()
-    user_subject = UserSubject(user_id=3, subject_id=2)
-    user_subject.save()
+    UserSubject.objects.bulk_create([
+        UserSubject(user_id=3, subject_id=1),
+        UserSubject(user_id=3, subject_id=2),
+    ])
+    Issue.objects.all().delete()
+    Issue.objects.bulk_create([
+        Issue(title='1', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0),
+        Issue(title='2', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0),
+        Issue(title='3', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0),
+        Issue(title='4', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0),
+        Issue(title='5', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0)
+    ])
+    ReviewIssues.objects.all().delete()
+    ReviewIssues.objects.bulk_create([
+        ReviewIssues(user_id=1, reviewer_id=3, issue_id=1, status=0),
+        ReviewIssues(user_id=1, reviewer_id=3, issue_id=3, status=0),
+        ReviewIssues(user_id=1, reviewer_id=3, issue_id=5, status=0),
+        ReviewIssues(user_id=1, reviewer_id=4, issue_id=4, status=0),
+    ])
 
 
 # init_database()
