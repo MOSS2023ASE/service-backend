@@ -32,8 +32,15 @@ def _find_chapter():
 
 class ChapterList(APIView):
     def post(self, request):
-        chapter = Chapter.objects.all()
-        chapter_serializer = ChapterSerializer(chapter, many=True)
+        try:
+            subject = Subject.objects.get(id=request.data['subject_id'])
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=SubjectErrorCode.SUBJECT_DOES_NOT_EXIST,
+                message="can't find subject!"
+            ))
+        chapter_serializer = ChapterSerializer(subject.chapters, many=True)
         data = {'chapter_list': chapter_serializer.data}
         return Response(response_json(
             success=True,
