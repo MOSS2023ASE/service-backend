@@ -39,6 +39,7 @@ class SubjectErrorCode:
     SUBJECT_SAVE_FAILED = 301
     SUBJECT_DOES_NOT_EXIST = 302
     SUBJECT_DELETE_FAILED = 303
+    SUBJECT_LIST_UPDATE_FAILED = 304
 
 
 class ChapterErrorCode:
