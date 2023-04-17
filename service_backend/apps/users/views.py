@@ -2,11 +2,36 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from service_backend.apps.users.models import User
 from service_backend.apps.subjects.models import UserSubject, Subject
+from service_backend.apps.issues.models import ReviewIssues, FollowIssues, LikeIssues, AdoptIssues, Issue
 from service_backend.apps.utils.views import response_json, encode_password, generate_jwt, check_role
-from service_backend.apps.utils.constants import UserErrorCode, SubjectErrorCode
+from service_backend.apps.utils.constants import UserErrorCode, SubjectErrorCode, IssueErrorCode
 
 
 # Create your views here.
+def _issue_list_to_json(issue_list):
+    return \
+        {'issue_list': [
+            {
+                'issue_id': issue.id,
+                'create_at': str(issue.created_at),
+                'update_at': str(issue.updated_at),
+                'title': issue.title,
+                'content': issue.content,
+                'user_id': issue.user_id,
+                'chapter_id': issue.chapter_id,
+                'chapter_name': issue.chapter.name,
+                'subject_id': issue.chapter.subject_id,
+                'subject_name': issue.chapter.subject.name,
+                'status': issue.status,
+                'anonymous': issue.anonymous,
+                'score': issue.score,
+                'user_name': issue.user.name
+            }
+            for issue in issue_list
+        ]
+        }
+
+
 class UserLogin(APIView):
     def post(self, request):
         # get user
@@ -182,4 +207,92 @@ class CheckUserSubject(APIView):
             data={
                 'result': result
             }
+        ))
+
+
+class GetReviewIssue(APIView):
+
+    @check_role([0, 1, 2])
+    def post(self, request, action_user: User = None):
+        page_no, issue_per_page = request.data['page_no'], request.data['issue_per_page']
+        try:
+            issue_list = Issue.objects.filter(review_issues__reviewer_id=action_user.id).order_by(
+                '-updated_at')
+        except Exception as _e:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.REVIEW_ISSUE_QUERY_FAILED,
+                message="query review issue failed!"
+            ))
+        issue_list = issue_list[(page_no - 1) * issue_per_page: page_no * issue_per_page]
+        return Response(response_json(
+            success=True,
+            message="query review issue successfully!",
+            data=_issue_list_to_json(issue_list)
+        ))
+
+
+class GetAdoptIssue(APIView):
+
+    @check_role([0, 1, 2])
+    def post(self, request, action_user: User = None):
+        page_no, issue_per_page = request.data['page_no'], request.data['issue_per_page']
+        try:
+            issue_list = Issue.objects.filter(adopt_issues__user_id=action_user.id).order_by(
+                '-updated_at')
+        except Exception as _e:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.ADOPT_ISSUE_QUERY_FAILED,
+                message="query adopt issue failed!"
+            ))
+        issue_list = issue_list[(page_no - 1) * issue_per_page: page_no * issue_per_page]
+        return Response(response_json(
+            success=True,
+            message="query adopt issue successfully!",
+            data=_issue_list_to_json(issue_list)
+        ))
+
+
+class GetFollowIssue(APIView):
+
+    @check_role([0, 1, 2])
+    def post(self, request, action_user: User = None):
+        page_no, issue_per_page = request.data['page_no'], request.data['issue_per_page']
+        try:
+            issue_list = Issue.objects.filter(follow_issues__user_id=action_user.id).order_by(
+                '-updated_at')
+        except Exception as _e:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.FOLLOW_ISSUE_QUERY_FAILED,
+                message="query follow issue failed!"
+            ))
+        issue_list = issue_list[(page_no - 1) * issue_per_page: page_no * issue_per_page]
+        return Response(response_json(
+            success=True,
+            message="query follow issue successfully!",
+            data=_issue_list_to_json(issue_list)
+        ))
+
+
+class GetAskIssue(APIView):
+
+    @check_role([0, 1, 2])
+    def post(self, request, action_user: User = None):
+        page_no, issue_per_page = request.data['page_no'], request.data['issue_per_page']
+        try:
+            issue_list = Issue.objects.filter(user_id=action_user.id).order_by(
+                '-updated_at')
+        except Exception as _e:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.ASK_ISSUE_QUERY_FAILED,
+                message="query ask issue failed!"
+            ))
+        issue_list = issue_list[(page_no - 1) * issue_per_page: page_no * issue_per_page]
+        return Response(response_json(
+            success=True,
+            message="query ask issue successfully!",
+            data=_issue_list_to_json(issue_list)
         ))

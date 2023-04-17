@@ -65,4 +65,3 @@ class ReviewIssues(MyModel):
 
     class Meta:
         db_table = 'review_issues'
-
