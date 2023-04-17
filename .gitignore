@@ -3,3 +3,4 @@
 refresh_db.sh
 init_db.py
 env.json
+db.sqlite3
