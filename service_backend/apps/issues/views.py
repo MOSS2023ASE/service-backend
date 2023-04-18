@@ -1,120 +1,578 @@
+import datetime
+import math
+from functools import wraps
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from service_backend.apps.issues.models import Issue
-from service_backend.apps.utils.views import response_json
-from service_backend.apps.issues.serializers import IssueSerializer
+
+from service_backend.apps.chapters.views import _find_chapter
+from service_backend.apps.tags.models import IssueTag, Tag
+from service_backend.apps.users.models import User
+from service_backend.apps.issues.models import Issue, Comment, LikeIssues, FollowIssues, AdoptIssues, ReviewIssues
+from service_backend.apps.utils.constants import UserRole, IssueStatus, IssueErrorCode, CommentErrorCode, \
+    IssueLikeErrorCode, IssueFollowErrorCode, IssueTagErrorCode, IssueReviewerErrorCode, OtherErrorCode
+from service_backend.apps.utils.views import response_json, check_role
+from service_backend.apps.issues.serializers import IssueSerializer, CommentSerializer, IssueSearchSerializer
 
 
-# TODO
-def _find_issue(func):
-    def wrapper(request, *args, **kwargs):
-        try:
-            issue = Issue.objects.get(id=request.data['issue_id'])
-        except Exception as e:
-            return Response(response_json(
-                success=False,
-                # TODO
-                code=1,
-                message="can't find issue!"
-            ))
-        return func(request, issue, *args, **kwargs)
+def _find_issue():
+    def decorated(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                issue = Issue.objects.get(id=args[1].data['issue_id'])
+            except Exception as e:
+                return Response(response_json(
+                    success=False,
+                    code=IssueErrorCode.ISSUE_NOT_FOUND,
+                    message="can't find issue!"
+                ))
+            return func(*args, **kwargs, issue=issue)
 
-    return wrapper
+        return wrapper
+
+    return decorated
 
 
 # Create your views here.
-@_find_issue
+
 class IssueGet(APIView):
+    @_find_issue()
     def get(self, request, issue):
         issue_serializer = IssueSerializer(issue)
         data = issue_serializer.data
+        adopter_issues = AdoptIssues.objects.filter(issue=issue)
+        counselor_list = [{
+            "user_id": adopter_issue.user.id,
+            "user_name": adopter_issue.user.name,
+            "user_avatar": adopter_issue.user.avatar
+        } for adopter_issue in adopter_issues]
+        reviewer_issues = ReviewIssues.objects.filter(issue=issue)
+        reviewer_list = [{
+            "user_id": reviewer_issue.user.id,
+            "user_name": reviewer_issue.user.name,
+            "user_avatar": reviewer_issue.user.avatar
+        } for reviewer_issue in reviewer_issues]
+        data['counselor_list'] = counselor_list
+        data['reviewer_list'] = reviewer_list
+        return Response(response_json(
+            success=True,
+            data=data
+        ))
 
-        print(data)
-        counselors = issue.adopt_issues.user
-        print(counselors)
 
-
-@_find_issue
 class IssueReview(APIView):
-    def post(self, request, issue):
-        pass
+    @check_role([UserRole.TUTOR, ])
+    @_find_issue()
+    def post(self, request, issue, action_user):
+        issue.reviewer = action_user
+        issue.status = IssueStatus.REVIEWING
+        try:
+            issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.ISSUE_SAVED_FAILED,
+                message="can't review issue!"
+            ))
+        # reviewer_issue = ReviewIssues(issue=issue, user=action_user, reviewer=issue.counselor, status=0)
+        # try:
+        #     reviewer_issue.save()
+        # except Exception as e:
+        #     return Response(response_json(
+        #         success=False,
+        #         code=IssueReviewerErrorCode.REVIEWER_ISSUE_SAVED_FAILED,
+        #         message="can't review issue!"
+        #     ))
+
+        return Response(response_json(
+            success=True,
+            message="adopt review success!"
+        ))
 
 
-@_find_issue
 class IssueAgree(APIView):
+    @check_role([UserRole.STUDENT, ])
+    @_find_issue()
     def post(self, request, issue):
-        pass
+        issue.status = IssueStatus.NOT_REVIEW
+        try:
+            issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.ISSUE_SAVED_FAILED,
+                message="can't review issue!"
+            ))
+        return Response(response_json(
+            success=True,
+            message="adopt review success!"
+        ))
 
 
-@_find_issue
 class IssueReject(APIView):
+    @check_role([UserRole.STUDENT, ])
+    @_find_issue()
     def post(self, request, issue):
-        pass
+        issue.counselor = None
+        issue.counsel_at = None
+        issue.status = IssueStatus.NOT_ADOPT
+        try:
+            issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.ISSUE_SAVED_FAILED,
+                message="can't reject issue!"
+            ))
+        return Response(response_json(
+            success=True,
+            message="reject issue success!"
+        ))
 
 
-@_find_issue
 class IssueAdopt(APIView):
-    def post(self, request, issue):
-        pass
+    @check_role([UserRole.TUTOR, ])
+    @_find_issue()
+    def post(self, request, issue, action_user):
+        issue.counselor = action_user
+        issue.counsel_at = datetime.datetime.now()
+        issue.status = IssueStatus.ADOPTING
+        try:
+            issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.ISSUE_SAVED_FAILED,
+                message="can't adopt issue!"
+            ))
+        adopt_issue = AdoptIssues(issue=issue, user=action_user, status=0)
+        try:
+            adopt_issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueReviewerErrorCode.REVIEWER_ISSUE_SAVED_FAILED,
+                message="can't review issue!"
+            ))
+
+        return Response(response_json(
+            success=True,
+            message="adopt issue success!"
+        ))
 
 
-@_find_issue
 class IssueCancel(APIView):
-    def post(self, request, issue):
-        pass
+    @check_role([UserRole.STUDENT])
+    @_find_issue()
+    def post(self, request, issue, action_user):
+        issue.status = IssueStatus.INVALID_ISSUE
+        try:
+            issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.ISSUE_SAVED_FAILED,
+                message="can't cancel issue!"
+            ))
+        return Response(response_json(
+            success=True,
+            message="cancel issue success!"
+        ))
 
 
-@_find_issue
 class IssueClassify(APIView):
-    def post(self, request, issue):
-        pass
+    @check_role([UserRole.TUTOR, ])
+    @_find_issue()
+    def post(self, request, issue, action_user):
+        reviewer_issue = ReviewIssues(issue=issue, user=action_user, reviewer=issue.counselor, status=0)
+        try:
+            reviewer_issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueReviewerErrorCode.REVIEWER_ISSUE_SAVED_FAILED,
+                message="can't review issue!"
+            ))
+
+        if request.data['is_valid'] == 1:
+            issue.status = IssueStatus.VALID_ISSUE
+        elif request.data['is_valid'] == 0:
+            issue.status = IssueStatus.INVALID_ISSUE
+        else:
+            return Response(response_json(
+                success=False,
+                code=OtherErrorCode.UNEXPECTED_JSON_FORMAT,
+                message="is_valid is not valid!"
+            ))
+        try:
+            issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.ISSUE_SAVED_FAILED,
+                message="can't classify issue!"
+            ))
+        return Response(response_json(
+            success=True,
+            message="classify issue success!"
+        ))
 
 
-@_find_issue
 class IssueReadopt(APIView):
-    def post(self, request, issut):
-        pass
+    @check_role([UserRole.TUTOR, ])
+    @_find_issue()
+    def post(self, request, issue, action_user):
+        issue.status = IssueStatus.ADOPTING
+        issue.counselor = action_user
+        issue.counsel_at = datetime.datetime.now()
+
+        reviewer_issue = ReviewIssues(issue=issue, user=action_user, reviewer=issue.counselor, status=1)
+        try:
+            reviewer_issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueReviewerErrorCode.REVIEWER_ISSUE_SAVED_FAILED,
+                message="can't review issue!"
+            ))
+
+        try:
+            issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.ISSUE_SAVED_FAILED,
+                message="can't readopt issue!"
+            ))
+        return Response(response_json(
+            success=True,
+            message="readopt issue success!"
+        ))
 
 
-@_find_issue
-class IssueTags(APIView):
-    pass
+class IssueTagList(APIView):
+    @_find_issue()
+    def post(self, request, issue):
+        issue_tags = IssueTag.objects.filter(issue=issue)
+        tags = [issue_tag.tag for issue_tag in issue_tags]
+        data = {
+            "tag_list": [
+                {
+                    "tag_id": tag.id,
+                    "tag_content": tag.content
+                }
+                for tag in tags
+            ]
+        }
+        return Response(response_json(
+            success=True,
+            data=data
+        ))
 
 
-@_find_issue
-class IssueTagsUpdate(APIView):
-    pass
+class IssueTagListUpdate(APIView):
+    @_find_issue()
+    def post(self, request, issue):
+        # 是否有更加优美的实现方式？
+        tag_id_list = request.data['tag_list']
+        tags = [Tag.objects.get(tag_id) for tag_id in tag_id_list]
+        for tag in tags:
+            issue_tag = IssueTag.objects.filter(issue=issue, tag=tag)
+            if not issue_tag:
+                obj = IssueTag(issue=issue, tag=tag)
+                try:
+                    obj.save()
+                except Exception as e:
+                    return Response(response_json(
+                        success=False,
+                        code=IssueTagErrorCode.ISSUE_TAG_SAVED_FAILED,
+                        message="can't save issue tag!"
+                    ))
+        issue_tags = IssueTag.objects.filter(issue=issue)
+        now_tags = [issue_tag.tag for issue_tag in issue_tags]
+        for tag in now_tags:
+            if tag not in tags:
+                issue_tag = IssueTag.objects.filter(issue=issue, tag=tag)
+                try:
+                    issue_tag.delete()
+                except Exception as e:
+                    return Response(response_json(
+                        success=False,
+                        code=IssueTagErrorCode.ISSUE_TAG_DELETE_FAILED,
+                        message="can't delete issue tag!"
+                    ))
+
+        return Response(response_json(
+            success=True
+        ))
 
 
-@_find_issue
 class IssueFollowCheck(APIView):
-    pass
+    @check_role([UserRole.STUDENT, ])
+    @_find_issue()
+    def post(self, request, issue, action_user):
+        is_follow = FollowIssues.objects.filter(issue=issue, user=action_user)
+        if not is_follow:
+            return Response(response_json(
+                success=True,
+                data={"is_follow": 1}
+            ))
+        else:
+            return Response(response_json(
+                success=True,
+                data={"is_follow": 0}
+            ))
 
 
-@_find_issue
 class IssueFollow(APIView):
-    pass
+    @check_role([UserRole.STUDENT, ])
+    @_find_issue()
+    def post(self, request, issue, action_user):
+        is_follow = FollowIssues.objects.filter(issue=issue, user=action_user)
+        if not is_follow:
+            follow = FollowIssues(issue=issue, user=action_user)
+            try:
+                follow.save()
+            except Exception as e:
+                return Response(response_json(
+                    success=False,
+                    code=IssueFollowErrorCode.ISSUE_FOLLOW_SAVED_FAILED,
+                    message="follow issue failed!"
+                ))
+            return Response(response_json(
+                success=True,
+                data={"is_follow": 0}
+            ))
+        else:
+            try:
+                is_follow.delete()
+            except Exception as e:
+                return Response(response_json(
+                    success=False,
+                    code=IssueFollowErrorCode.ISSUE_FOLLOW_DELETE_FAILED,
+                    message="cancel follow failed!"
+                ))
+            return Response(response_json(
+                success=True,
+                data={"is_follow": 1}
+            ))
 
 
-@_find_issue
 class IssueFavorite(APIView):
-    pass
+    @check_role([UserRole.STUDENT, ])
+    @_find_issue()
+    def post(self, request, issue, action_user):
+        is_like = LikeIssues.objects.filter(issue=issue, user=action_user)
+        if not is_like:
+            return Response(response_json(
+                success=True,
+                data={"is_like": 0}
+            ))
+        else:
+            return Response(response_json(
+                success=True,
+                data={"is_like": 1}
+            ))
 
 
-@_find_issue
 class IssueLike(APIView):
-    pass
+    @check_role([UserRole.STUDENT, ])
+    @_find_issue()
+    def post(self, request, issue, action_user):
+        is_like = LikeIssues.objects.filter(issue=issue, user=action_user)
+        if not is_like:
+            like = LikeIssues(issue=issue, user=action_user)
+            try:
+                like.save()
+            except Exception as e:
+                return Response(response_json(
+                    success=False,
+                    code=IssueLikeErrorCode.ISSUE_LIKE_SAVED_FAILED,
+                    message="like issue failed!!"
+                ))
+            return Response(response_json(
+                success=True,
+                data={"is_like": 1}
+            ))
+        else:
+            try:
+                is_like.delete()
+            except Exception as e:
+                return Response(response_json(
+                    success=False,
+                    code=IssueLikeErrorCode.ISSUE_LIKE_DELETE_FAILED
+                ))
+            return Response(response_json(
+                success=True,
+                data={"is_like": 0}
+            ))
 
 
-@_find_issue
 class IssueUpdate(APIView):
-    pass
+    @_find_chapter()
+    @_find_issue()
+    def post(self, request, issue, chapter):
+        issue.title = request.data['title']
+        issue.content = request.data['content']
+        issue.anonymous = request.data['anonymous']
+        issue.chapter = chapter
+        try:
+            issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.ISSUE_SAVED_FAILED,
+                message="can't save issue!"
+            ))
+        return Response(response_json(
+            success=True
+        ))
 
 
-@_find_issue
 class IssueCommit(APIView):
-    pass
+    @check_role([UserRole.STUDENT, ])
+    @_find_chapter()
+    def post(self, request, chapter, action_user):
+        title = request.data['title']
+        content = request.data['content']
+        anonymous = request.data['anonymous']
+        status = IssueStatus.NOT_ADOPT
+        issue = Issue(title=title, content=content, user=action_user, chapter=chapter, status=status,
+                      anonymous=anonymous)
+        try:
+            issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.ISSUE_SAVED_FAILED,
+                message="can't save issue!"
+            ))
+
+        return Response(response_json(
+            success=True,
+            message="issue commit success!"
+        ))
 
 
 class IssueSearch(APIView):
-    pass
+    def post(self, request):
+        keyword = request.data['keyword']
+        tag_list = request.data['tag_list']
+        status_list = request.data['status_list']
+        chapter_list = request.data['chapter_list']
+        order = request.data['order']
+        page_no = request.data['page_no']
+        issue_per_page = request.data['issue_per_page']
+        issues = Issue.objects.all()
+        for status in status_list:
+            issues = issues.filter(status=status)
+        for chapter in chapter_list:
+            issues = issues.filter(chapter_id=chapter)
+        for tag in tag_list:
+            issues = issues.filter(tag_id=tag)
+
+        # 0：最近优先，1：最早优先，2：最热优先，3：综合排序（综合排序方式待定，可以先随便排，之后再调整）
+        issues = issues.order_by('created_at')
+        begin = (page_no - 1) * issue_per_page
+        end = page_no * issue_per_page
+        issues = issues[begin:end]
+        total_page = math.ceil(len(issues) / issue_per_page)
+        issue_list = IssueSearchSerializer(issues, many=True).data
+        return Response(response_json(
+            success=True,
+            data={
+                "issue_list": issue_list,
+                "total_page": total_page
+            }
+        ))
+
+
+# Comment
+def _find_comment():
+    def decorated(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                comment = Comment.objects.get(id=args[1].data['comment_id'])
+            except Exception as e:
+                return Response(response_json(
+                    success=False,
+                    code=CommentErrorCode.COMMENT_NOT_FOUND,
+                    message="can't find comment!"
+                ))
+            return func(*args, **kwargs, comment=comment)
+
+        return wrapper
+
+    return decorated
+
+
+class CommentList(APIView):
+    @_find_issue()
+    def post(self, request, issue):
+        commet_serializer = CommentSerializer(issue.comments, many=True)
+        data = {"comment_list": commet_serializer.data}
+        return Response(response_json(
+            success=True,
+            data=data
+        ))
+
+
+class CommentCreate(APIView):
+    @check_role([UserRole.STUDENT, UserRole.TUTOR])
+    @_find_issue()
+    def post(self, request, issue, action_user):
+        content = request.data['content']
+        comment = Comment(content=content, issue=issue, user=action_user)
+        try:
+            comment.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=CommentErrorCode.COMMENT_SAVED_FAILED,
+                message="can't save comment!"
+            ))
+
+        return Response(response_json(
+            success=True,
+            message="create comment success!",
+            data={"comment_id": comment.id}
+        ))
+
+
+class CommentUpdate(APIView):
+    @_find_comment()
+    def post(self, request, comment):
+        comment.content = request.data['content']
+        try:
+            comment.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=CommentErrorCode.COMMENT_SAVED_FAILED,
+                message="can't save comment!"
+            ))
+
+        return Response(response_json(
+            success=True,
+            message="update comment success!"
+        ))
+
+
+class CommentDelete(APIView):
+    @_find_comment()
+    def post(self, request, comment):
+        try:
+            comment.delete()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=CommentErrorCode.COMMENT_DELETE_FAILED,
+                message="can't delete comment!"
+            ))
+
+        return Response(response_json(
+            success=True,
+            message="delete comment success!"
+        ))
