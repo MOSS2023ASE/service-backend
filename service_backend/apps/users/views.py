@@ -4,7 +4,7 @@ from service_backend.apps.users.models import User
 from service_backend.apps.subjects.models import UserSubject, Subject
 from service_backend.apps.issues.models import ReviewIssues, FollowIssues, LikeIssues, AdoptIssues, Issue
 from service_backend.apps.utils.views import response_json, encode_password, generate_jwt, check_role
-from service_backend.apps.utils.constants import UserErrorCode, SubjectErrorCode, IssueErrorCode
+from service_backend.apps.utils.constants import UserErrorCode, SubjectErrorCode, IssueErrorCode, UserRole
 
 
 # Create your views here.
@@ -73,7 +73,7 @@ class UserLogin(APIView):
 
 
 class UserLogout(APIView):
-    @check_role([0, 1, 2])
+    @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         return Response(response_json(
             success=True,
@@ -83,7 +83,7 @@ class UserLogout(APIView):
 
 class PasswordModify(APIView):
 
-    @check_role([0, 1, 2])
+    @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         if action_user.password_digest != encode_password(request.data['password_old']):
             return Response(response_json(
@@ -108,7 +108,7 @@ class PasswordModify(APIView):
 
 class GetUserInfo(APIView):
 
-    @check_role([0, 1, 2])
+    @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         return Response(response_json(
             success=True,
@@ -125,7 +125,7 @@ class GetUserInfo(APIView):
 
 class ModifyUserInfo(APIView):
 
-    @check_role([0, 1, 2])
+    @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         try:
             action_user.avatar = request.data['avatar']
@@ -145,7 +145,7 @@ class ModifyUserInfo(APIView):
 
 class GetUserSubject(APIView):
 
-    @check_role([0, 1, 2])
+    @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         # check tutor id
         try:
@@ -185,7 +185,7 @@ class GetUserSubject(APIView):
 
 class ModifyUserSubject(APIView):
 
-    @check_role([0, 1, 2])
+    @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         tutor_id, subject_id_list = request.data['tutor_id'], request.data['subject_id_list']
         try:
@@ -207,7 +207,7 @@ class ModifyUserSubject(APIView):
 
 class CheckUserSubject(APIView):
 
-    @check_role([0, 1, 2])
+    @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         tutor_id, subject_id = request.data['tutor_id'], request.data['subject_id']
         result = 1 if UserSubject.objects.filter(user_id=tutor_id, subject_id=subject_id).exists() else 0
@@ -222,7 +222,7 @@ class CheckUserSubject(APIView):
 
 class GetReviewIssue(APIView):
 
-    @check_role([0, 1, 2])
+    @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         page_no, issue_per_page = request.data['page_no'], request.data['issue_per_page']
         try:
@@ -244,7 +244,7 @@ class GetReviewIssue(APIView):
 
 class GetAdoptIssue(APIView):
 
-    @check_role([0, 1, 2])
+    @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         page_no, issue_per_page = request.data['page_no'], request.data['issue_per_page']
         try:
@@ -266,7 +266,7 @@ class GetAdoptIssue(APIView):
 
 class GetFollowIssue(APIView):
 
-    @check_role([0, 1, 2])
+    @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         page_no, issue_per_page = request.data['page_no'], request.data['issue_per_page']
         try:
@@ -288,7 +288,7 @@ class GetFollowIssue(APIView):
 
 class GetAskIssue(APIView):
 
-    @check_role([0, 1, 2])
+    @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         page_no, issue_per_page = request.data['page_no'], request.data['issue_per_page']
         try:

@@ -4,9 +4,8 @@ class GlobalCode:
 
 
 class UserRole:
-    STUDENT = 0
-    TUTOR = 1
-    ADMIN = 2
+    ALL_USERS = [0, 1, 2]
+    ADMIN_ONLY = [2, ]
 
 
 class YearErrorCode:
