@@ -34,6 +34,7 @@ def _issue_list_to_json(issue_list):
 
 class UserLogin(APIView):
     def post(self, request):
+        print(request.data)
         # get user
         try:
             # if no invalid id, User.objects.get will raise exception

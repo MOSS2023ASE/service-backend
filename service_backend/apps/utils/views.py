@@ -53,7 +53,6 @@ def check_jwt(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         token = args[1].data['jwt']  # args = (<class>, <request>)
-        print(type(token), token)
         user_id, response = decode_jwt(token)
         if not user_id:
             return Response(response)
@@ -68,6 +67,7 @@ def check_role(role_list: list):
         def wrapper(*args, **kwargs):
             # check jwt,  args = (<class>, <request>)
             token = args[1].data['jwt']
+            # token = args[1].META['HTTP_AUTHORIZATION']
             user_id, response = decode_jwt(token)
             if not user_id:
                 return Response(response)
