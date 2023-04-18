@@ -6,6 +6,9 @@ class GlobalCode:
 class UserRole:
     ALL_USERS = [0, 1, 2]
     ADMIN_ONLY = [2, ]
+    STUDENT = 0
+    TUTOR = 1
+    ADMIN = 2
 
 
 # 问题状态，0：未认领(默认)，1：已认领，2：未认领复审 3: 已认领复审 4: 有效提问 5: 无效提问
