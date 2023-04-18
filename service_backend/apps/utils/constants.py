@@ -37,10 +37,6 @@ class UserErrorCode:
     PERMISSION_DENIED = 207
 
 
-class OtherErrorCode:
-    UNEXPECTED_JSON_FORMAT = 901
-
-
 class SubjectErrorCode:
     SUBJECT_SAVE_FAILED = 301
     SUBJECT_DOES_NOT_EXIST = 302
@@ -70,7 +66,6 @@ class IssueErrorCode:
     ASK_ISSUE_QUERY_FAILED = 607
 
 
-
 class CommentErrorCode:
     COMMENT_NOT_FOUND = 601
     COMMENT_DELETE_FAILED = 602
@@ -91,5 +86,17 @@ class IssueTagErrorCode:
     ISSUE_TAG_SAVED_FAILED = 801
     ISSUE_TAG_DELETE_FAILED = 802
 
+
 class IssueReviewerErrorCode:
     REVIEWER_ISSUE_SAVED_FAILED = 901
+
+    
+class OtherErrorCode:
+    UNEXPECTED_JSON_FORMAT = 901
+
+
+class ImageErrorCode:
+    IMAGE_LOAD_FAILED = 601
+    WRONG_IMAGE_FORMAT = 602
+    UNEXPECTED_IMAGE_NAME = 603
+    IMAGE_SAVE_FAILED = 604

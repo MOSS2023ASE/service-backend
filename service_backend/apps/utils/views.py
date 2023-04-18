@@ -3,7 +3,6 @@ from service_backend.apps.users.models import User
 from service_backend.apps.issues.models import Issue, ReviewIssues, AdoptIssues, LikeIssues, FollowIssues
 from service_backend.apps.years.models import Year
 from service_backend.apps.chapters.models import Chapter
-from service_backend.apps.subjects.models import Subject
 from service_backend.apps.subjects.models import Subject, UserSubject
 from service_backend.settings import ENV
 from rest_framework.response import Response
