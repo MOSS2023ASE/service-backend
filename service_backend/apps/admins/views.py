@@ -10,7 +10,7 @@ from service_backend.apps.utils.constants import UserErrorCode, UserRole, OtherE
 # Create your views here.
 class CreateUser(APIView):
 
-    @check_role([UserRole.ADMIN, ])
+    @check_role([UserRole.ADMIN_ONLY])
     def post(self, request, action_user: User = None):
         # create user
         try:
@@ -40,7 +40,7 @@ class CreateUser(APIView):
 
 class CreateUserBatch(APIView):
 
-    @check_role([UserRole.ADMIN, ])
+    @check_role([UserRole.ADMIN_ONLY])
     def post(self, request, action_user: User = None):
         # print('user_id is:' + str(user_id))
         # preprocess list
@@ -81,7 +81,7 @@ class CreateUserBatch(APIView):
 
 class UserList(APIView):
 
-    @check_role([UserRole.ADMIN, ])
+    @check_role([UserRole.ADMIN_ONLY])
     def post(self, request):
         user = User.objects.all()
         user_serializar = UserSerializer(user, many=True)
@@ -103,7 +103,7 @@ class UserList(APIView):
 
 
 class UpdateUserRole(APIView):
-    @check_role([UserRole.ADMIN, ])
+    @check_role([UserRole.ADMIN_ONLY])
     def post(self, request, action_user: User = None):
         # get user
         try:
@@ -132,7 +132,7 @@ class UpdateUserRole(APIView):
 
 
 class FreezeUser(APIView):
-    @check_role([UserRole.ADMIN, ])
+    @check_role([UserRole.ADMIN_ONLY])
     def post(self, request, action_user: User = None):
         # get user
         try:
@@ -162,7 +162,7 @@ class FreezeUser(APIView):
 
 class DeleteIssue(APIView):
 
-    @check_role([UserRole.ADMIN, ])
+    @check_role([UserRole.ADMIN_ONLY])
     def post(self, request, action_user: User = None):
         try:
             issue = Issue.objects.get(id=request.data['issue_id'])

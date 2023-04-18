@@ -1,5 +1,10 @@
 from service_backend.apps.utils.constants import GlobalCode, UserErrorCode
 from service_backend.apps.users.models import User
+from service_backend.apps.issues.models import Issue, ReviewIssues, AdoptIssues, LikeIssues, FollowIssues
+from service_backend.apps.years.models import Year
+from service_backend.apps.chapters.models import Chapter
+from service_backend.apps.subjects.models import Subject
+from service_backend.apps.subjects.models import Subject, UserSubject
 from service_backend.settings import ENV
 from rest_framework.response import Response
 from datetime import datetime
@@ -27,7 +32,7 @@ def decode_jwt(token: str) -> (int, dict):
         jwt_dict = decode(jwt=token, algorithms='HS256', key=ENV['JWT_KEY'])
         start_time = datetime.fromisoformat(jwt_dict['time'])
         seconds = (datetime.now() - start_time).seconds
-        if seconds < 3600.0:
+        if seconds < 3600000.0:     # TODO, change to 3600 when release
             user_id = jwt_dict['user_id']
         else:
             message, code = 'expired jwt token!', UserErrorCode.EXPIRED_JWT
@@ -36,8 +41,6 @@ def decode_jwt(token: str) -> (int, dict):
     if not user_id:
         response = response_json(success=False, code=code, message=message)
     return user_id, response
-
-
 
 
 def generate_jwt(user_id: int) -> str:
@@ -56,6 +59,7 @@ def check_jwt(f):
         if not user_id:
             return Response(response)
         return f(*args, **kwargs, user_id=user_id)
+
     return wrapper
 
 
@@ -71,7 +75,7 @@ def check_role(role_list: list):
             # check authority
             user = User.objects.get(id=user_id)
             # print(user.id, user.user_role)
-            if user.id and user.frozen:   # have such user and frozen
+            if user.id and user.frozen:  # have such user and frozen
                 return Response(response_json(
                     success=False,
                     code=UserErrorCode.USER_FROZEN,
@@ -84,7 +88,9 @@ def check_role(role_list: list):
                     message='permission denied!'
                 ))
             return f(*args, **kwargs, action_user=user)
+
         return wrapper
+
     return decorated
 
 
@@ -96,5 +102,49 @@ def encode_password(message: str, salt=ENV['PASSWORD_SALT']) -> str:
         h.update(h.hexdigest().encode())
     return h.hexdigest()
 
+
+def init_database():
+    User.objects.all().delete()
+    User.objects.bulk_create([
+        User(student_id='20373743', name='ccy', password_digest=encode_password('123456'), user_role=2, frozen=0),
+        User(student_id='20373043', name='lsz', password_digest=encode_password('123456'), user_role=0, frozen=0),
+        User(student_id='20373044', name='xyy', password_digest=encode_password('123456'), user_role=1, frozen=0),
+        User(student_id='20373045', name='xxx', password_digest=encode_password('123456'), user_role=1, frozen=0),
+    ])
+    Year.objects.all().delete()
+    Year.objects.bulk_create([Year(content='2023年')])
+    Subject.objects.all().delete()
+    Subject.objects.bulk_create([
+        Subject(name='数学分析2', content='...', year_id=1),
+        Subject(name='大学物理', content='...', year_id=1),
+    ])
+    Chapter.objects.all().delete()
+    Chapter.objects.bulk_create([
+        Chapter(subject_id=1, name='多元函数求导', content='hh'),
+        Chapter(subject_id=2, name='角动量', content='hhh'),
+    ])
+    UserSubject.objects.all().delete()
+    UserSubject.objects.bulk_create([
+        UserSubject(user_id=3, subject_id=1),
+        UserSubject(user_id=3, subject_id=2),
+    ])
+    Issue.objects.all().delete()
+    Issue.objects.bulk_create([
+        Issue(title='1', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0),
+        Issue(title='2', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0),
+        Issue(title='3', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0),
+        Issue(title='4', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0),
+        Issue(title='5', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0)
+    ])
+    ReviewIssues.objects.all().delete()
+    ReviewIssues.objects.bulk_create([
+        ReviewIssues(user_id=1, reviewer_id=3, issue_id=1, status=0),
+        ReviewIssues(user_id=1, reviewer_id=3, issue_id=3, status=0),
+        ReviewIssues(user_id=1, reviewer_id=3, issue_id=5, status=0),
+        ReviewIssues(user_id=1, reviewer_id=4, issue_id=4, status=0),
+    ])
+
+
+# init_database()
 
 # print(generate_jwt(10001))

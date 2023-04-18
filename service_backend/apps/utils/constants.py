@@ -4,9 +4,8 @@ class GlobalCode:
 
 
 class UserRole:
-    STUDENT = 0
-    TUTOR = 1
-    ADMIN = 2
+    ALL_USERS = [0, 1, 2]
+    ADMIN_ONLY = [2, ]
 
 
 # 问题状态，0：未认领(默认)，1：已认领，2：未认领复审 3: 已认领复审 4: 有效提问 5: 无效提问
@@ -43,6 +42,7 @@ class SubjectErrorCode:
     SUBJECT_SAVE_FAILED = 301
     SUBJECT_DOES_NOT_EXIST = 302
     SUBJECT_DELETE_FAILED = 303
+    SUBJECT_LIST_UPDATE_FAILED = 304
 
 
 class ChapterErrorCode:
@@ -61,6 +61,11 @@ class IssueErrorCode:
     ISSUE_NOT_FOUND = 601
     ISSUE_DELETE_FAILED = 602
     ISSUE_SAVED_FAILED = 603
+    REVIEW_ISSUE_QUERY_FAILED = 604
+    ADOPT_ISSUE_QUERY_FAILED = 605
+    FOLLOW_ISSUE_QUERY_FAILED = 606
+    ASK_ISSUE_QUERY_FAILED = 607
+
 
 
 class CommentErrorCode:

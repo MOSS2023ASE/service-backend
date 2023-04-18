@@ -1,0 +1,27 @@
+name: Pull and Rerun Backend Service
+  # You may pin to the exact commit or the version.
+  # uses: TencentCloudBase/cloudbase-action@7d4cf39abbdc53bad003a47c18d968c8a28916a2
+
+# 触发此CI/CD的事件
+on:
+  push: # push时
+    branches: # 选定push到哪个分支会触发该事件
+      - dev # 只在push到master分支时触发
+
+jobs:
+  # build job
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout # 这一step的名称为Checkout
+      uses: actions/checkout@master
+    - name: Deploy
+      uses: appleboy/ssh-action@master
+      with: 
+        host: ${{ secrets.CLOUD_HOST}}
+        username: ${{ secrets.CLOUD_USERNAME }}
+        password: ${{ secrets.CLOUD_PASSWORD }}
+        port: ${{ secrets.CLOUD_PORT }}
+        script: |
+          cd ~
+          source backend_cicd.sh
