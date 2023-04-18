@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-import json
+import json, os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'service_backend.apps.utils',
     'service_backend.apps.admins',
     'service_backend.apps.chapters',
+    'service_backend.apps.images',
     'service_backend.apps.issues',
     'service_backend.apps.subjects',
     'service_backend.apps.tags',
@@ -126,6 +127,15 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# media file saved path for browser
+# MEDIA_ROOT = '/home/public/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static')
+
+# static file find path
+STATICFILES_DIRS = [
+    MEDIA_ROOT
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
