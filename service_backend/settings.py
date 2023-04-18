@@ -129,8 +129,8 @@ USE_TZ = False
 STATIC_URL = '/static/'
 
 # media file saved path for browser
-# MEDIA_ROOT = '/home/public/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_ROOT = '/home/ubuntu/pic'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'static')
 
 # static file find path
 STATICFILES_DIRS = [

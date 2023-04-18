@@ -9,8 +9,8 @@ import os
 import uuid
 from datetime import datetime
 
-# PIC_URL_BASE = 'http://shieask:8080'
-PIC_URL_BASE = 'http://localhost:8000'
+PIC_URL_BASE = "http://shieask.com/pic/"
+# PIC_URL_BASE = 'http://localhost:8000'
 
 
 # Create your views here.
@@ -25,15 +25,20 @@ class UploadImage(APIView):
     @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         try:
-            print(123)
             # form_data
+            print(request)
+            print(request.data)
+            print(request.FILES)
             image = request.data['form_data']
+            # print(request.FILES)
+            # image = request.FILES.get('form_data')
             print(type(image))
             image_root = os.path.join(MEDIA_ROOT)
             image_type = image.name.split('.')[-1]
             image_name = str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())) + '_' + str(uuid.uuid4()) + '.' + image_type
             image_path = os.path.join(image_root, image_name)
         except Exception as _e:
+            # raise _e
             return Response(response_json(
                 success=False,
                 code=ImageErrorCode.IMAGE_LOAD_FAILED,
@@ -67,6 +72,6 @@ class UploadImage(APIView):
             success=True,
             message='upload image successfully!',
             data={
-                'url': PIC_URL_BASE + STATIC_URL + image_name
+                'url': PIC_URL_BASE + image_name
             }
         ))
