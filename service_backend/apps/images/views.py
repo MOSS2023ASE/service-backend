@@ -22,14 +22,15 @@ class UploadAvatar(APIView):
 
 class UploadImage(APIView):
 
-    @check_role(UserRole.ALL_USERS)
-    def post(self, request, action_user: User = None):
+    # @check_role(UserRole.ALL_USERS)
+    def post(self, request):#, action_user: User = None):
         try:
             # form_data
-            print(request)
-            print(request.data)
-            print(request.FILES)
-            image = request.data['form_data']
+            # print(request)
+            print(request.data['file'])
+            # print(request.FILES)
+            # print(request.form_data)
+            image = request.data['file']
             # print(request.FILES)
             # image = request.FILES.get('form_data')
             print(type(image))
