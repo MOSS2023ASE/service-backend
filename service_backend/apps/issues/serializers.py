@@ -75,19 +75,19 @@ class IssueSearchSerializer(serializers.ModelSerializer):
         return obj.title
 
     def get_user_id(self, obj):
-        if obj.anonymous:
+        if obj.anonymous == 1:
             return 0
         else:
             return obj.user.id
 
     def get_user_name(self, obj):
-        if obj.anonymous:
+        if obj.anonymous == 1:
             return "匿名"
         else:
             return obj.user.name
 
     def get_user_avatar(self, obj):
-        if obj.anonymous:
+        if obj.anonymous == 1:
             return None
         else:
             return obj.user.avatar
