@@ -9,7 +9,7 @@ from service_backend.apps.users.models import User
 class Subject(MyModel):
     name = models.CharField(max_length=255, unique=True, db_index=True)
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='subjects')
-    content = models.TextField()
+    content = models.CharField(max_length=3071)
 
     class Meta:
         db_table = 'subjects'

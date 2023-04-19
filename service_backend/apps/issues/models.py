@@ -8,7 +8,7 @@ from service_backend.apps.chapters.models import Chapter
 # Create your models here.
 class Issue(MyModel):
     title = models.CharField(max_length=255)
-    content = models.TextField()
+    content = models.CharField(max_length=3071)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_issues')
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE, related_name='issues')
     counselor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='counselor_issues', null=True)
@@ -24,7 +24,7 @@ class Issue(MyModel):
 
 
 class Comment(MyModel):
-    content = models.TextField()
+    content = models.CharField(max_length=3071)
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
 
