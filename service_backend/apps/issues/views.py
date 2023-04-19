@@ -550,9 +550,9 @@ class IssueSearch(APIView):
             issues = issues & q
 
         if order == 0:
-            issues = issues.order_by('created_at')
-        elif order == 1:
             issues = issues.order_by('-created_at')
+        elif order == 1:
+            issues = issues.order_by('created_at')
         else:
             pass
 
