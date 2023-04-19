@@ -7,6 +7,7 @@ from service_backend.apps.utils.constants import ImageErrorCode, UserRole
 
 import os
 import uuid
+import imghdr
 from datetime import datetime
 
 PIC_URL_BASE = "http://shieask.com/pic/"
@@ -22,8 +23,8 @@ class UploadAvatar(APIView):
 
 class UploadImage(APIView):
 
-    # @check_role(UserRole.ALL_USERS)
-    def post(self, request):#, action_user: User = None):
+    @check_role(UserRole.ALL_USERS)
+    def post(self, request, action_user: User = None):
         try:
             # form_data
             # print(request)
@@ -31,12 +32,15 @@ class UploadImage(APIView):
             # print(request.FILES)
             # print(request.form_data)
             image = request.data['file']
+            print(image.size)
             # print(request.FILES)
             # image = request.FILES.get('form_data')
             print(type(image))
             image_root = os.path.join(MEDIA_ROOT)
+            print(image_root)
             image_type = image.name.split('.')[-1]
-            image_name = str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())) + '_' + str(uuid.uuid4()) + '.' + image_type
+            image_name = action_user.student_id + '_' + datetime.now().strftime("%Y%m%d%H%M%S") + '_' + str(uuid.uuid4()) + '.' + image_type
+            print(image_name)
             image_path = os.path.join(image_root, image_name)
         except Exception as _e:
             # raise _e
@@ -57,7 +61,6 @@ class UploadImage(APIView):
             print(image_root)
             if not os.path.exists(image_root):
                 os.mkdir(image_root)
-            print(image_root)
             with open(image_path, 'wb+') as f:
                 for chunk in image.chunks():
                     f.write(chunk)
