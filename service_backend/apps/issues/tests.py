@@ -195,6 +195,23 @@ class IssueAPITestCase(APITestCase):
         self.assertEqual(response.data['code'], 0)
         return
 
+    def test_issue_search(self):
+        jwt = self._student_login()
+        url = '/issue/'
+        data = {
+            "jwt": jwt,
+            "keyword": "",
+            "tag_list": [],
+            "status_list": [],
+            "chapter_list": [],
+            "order": "",
+            "page_no": 1,
+            "issue_per_page": 100
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+        return
+
     def test_issue_tags(self):
         jwt = self._student_login()
         url = '/issue/tags'
