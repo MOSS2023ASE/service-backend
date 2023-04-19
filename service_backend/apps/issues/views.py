@@ -135,7 +135,7 @@ class IssueAgree(APIView):
 
 
 class IssueReject(APIView):
-    @check_role([UserRole.STUDENT])
+    @check_role([UserRole.STUDENT, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         if action_user.user_role == UserRole.STUDENT and \
@@ -204,7 +204,7 @@ class IssueAdopt(APIView):
 
 
 class IssueCancel(APIView):
-    @check_role([UserRole.STUDENT])
+    @check_role([UserRole.STUDENT, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         if action_user.user_role == UserRole.STUDENT and \
@@ -374,7 +374,7 @@ class IssueTagListUpdate(APIView):
 
 
 class IssueFollowCheck(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_follow = FollowIssues.objects.filter(issue=issue, user=action_user)
@@ -391,7 +391,7 @@ class IssueFollowCheck(APIView):
 
 
 class IssueFollow(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_follow = FollowIssues.objects.filter(issue=issue, user=action_user)
@@ -425,7 +425,7 @@ class IssueFollow(APIView):
 
 
 class IssueFavorite(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_like = LikeIssues.objects.filter(issue=issue, user=action_user)
@@ -442,7 +442,7 @@ class IssueFavorite(APIView):
 
 
 class IssueLike(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_like = LikeIssues.objects.filter(issue=issue, user=action_user)
@@ -550,9 +550,9 @@ class IssueSearch(APIView):
             issues = issues & q
 
         if order == 0:
-            issues = issues.order_by('created_at')
-        elif order == 1:
             issues = issues.order_by('-created_at')
+        elif order == 1:
+            issues = issues.order_by('created_at')
         else:
             pass
 
@@ -604,7 +604,7 @@ class CommentList(APIView):
 
 
 class CommentCreate(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         content = request.data['content']
