@@ -26,22 +26,9 @@ class UploadImage(APIView):
     @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         try:
-            # form_data
-            # print(request)
-            print(request.data['file'])
-            # print(request.FILES)
-            # print(request.form_data)
             image = request.data['file']
-            print(image.size)
-            # print(request.FILES)
-            # image = request.FILES.get('form_data')
+            image_type = imghdr.what(image)
             print(type(image))
-            image_root = os.path.join(MEDIA_ROOT)
-            print(image_root)
-            image_type = image.name.split('.')[-1]
-            image_name = action_user.student_id + '_' + datetime.now().strftime("%Y%m%d%H%M%S") + '_' + str(uuid.uuid4()) + '.' + image_type
-            print(image_name)
-            image_path = os.path.join(image_root, image_name)
         except Exception as _e:
             # raise _e
             return Response(response_json(
@@ -49,12 +36,30 @@ class UploadImage(APIView):
                 code=ImageErrorCode.IMAGE_LOAD_FAILED,
                 message="image load failed!"
             ))
+        if image.size > (5 << 20):
+            return Response(response_json(
+                success=False,
+                code=ImageErrorCode.IMAGE_TOO_BIG,
+                message="size of uploaded image can't exceed 5MB!"
+            ))
+        if image_type is None:
+            return Response(response_json(
+                success=False,
+                code=ImageErrorCode.INVALID_IMAGE_FORMAT,
+                message="not an image-format file!"
+            ))
+
+        image_root = os.path.join(MEDIA_ROOT)
+        image_name = action_user.student_id + '_' + datetime.now().strftime("%Y%m%d%H%M%S") + '_' + str(uuid.uuid4()) + '.' + image_type
+        image_path = os.path.join(image_root, image_name)
+        print(image_root)
+        print(image_name)
         # get file
-        if image_type not in ('jpeg', 'jpg', 'png', 'bmp', 'tif', 'gif'):
+        if image_type != image.name.split('.')[-1]:
             return Response(response_json(
                 success=False,
                 code=ImageErrorCode.UNEXPECTED_IMAGE_NAME,
-                message='unexpected file name!'
+                message='wrong image suffix!'
             ))
         # store file
         try:
