@@ -66,7 +66,7 @@ def check_role(role_list: list):
         @wraps(f)
         def wrapper(*args, **kwargs):
             # check jwt,  args = (<class>, <request>)
-            print(args[1].META)
+            # print(args[1].META)
             if args[1].data.__contains__('jwt'):
                 token = args[1].data['jwt']
             else:
