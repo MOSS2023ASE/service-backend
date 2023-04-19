@@ -28,7 +28,7 @@ class UploadImage(APIView):
         try:
             image = request.data['file']
             image_type = imghdr.what(image)
-            print(type(image))
+            # print(type(image))
         except Exception as _e:
             # raise _e
             return Response(response_json(

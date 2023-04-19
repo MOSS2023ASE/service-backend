@@ -34,7 +34,7 @@ def _issue_list_to_json(issue_list):
 
 class UserLogin(APIView):
     def post(self, request):
-        print(request.data)
+        # print(request.data)
         # get user
         try:
             # if no invalid id, User.objects.get will raise exception
@@ -53,7 +53,7 @@ class UserLogin(APIView):
             if password_digest != user.password_digest:
                 raise Exception()
             jwt_token = generate_jwt(user.id)
-            print(jwt_token)
+            # print(jwt_token)
         except Exception as e:
             return Response(response_json(
                 success=False,
