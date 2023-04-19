@@ -14,10 +14,14 @@ class UserAPITestCase(APITestCase):
     def setUp(self):
         User.objects.all().delete()
         User.objects.bulk_create([
-            User(id=1, student_id='20373743', name='ccy', password_digest=encode_password('123456'), user_role=2, frozen=0),
-            User(id=2, student_id='20373043', name='lsz', password_digest=encode_password('123456'), user_role=0, frozen=0),
-            User(id=3, student_id='20373044', name='xyy', password_digest=encode_password('123456'), user_role=1, frozen=0),
-            User(id=4, student_id='20373045', name='xxx', password_digest=encode_password('123456'), user_role=1, frozen=0),
+            User(id=1, student_id='20373743', name='ccy', password_digest=encode_password('123456'), user_role=2,
+                 frozen=0),
+            User(id=2, student_id='20373043', name='lsz', password_digest=encode_password('123456'), user_role=0,
+                 frozen=0),
+            User(id=3, student_id='20373044', name='xyy', password_digest=encode_password('123456'), user_role=1,
+                 frozen=0),
+            User(id=4, student_id='20373045', name='xxx', password_digest=encode_password('123456'), user_role=1,
+                 frozen=0),
         ])
         Year.objects.all().delete()
         Year.objects.bulk_create([Year(id=1, content='2023年')])
@@ -133,4 +137,34 @@ class UserAPITestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['message'], 'modify password successfully!')
         self.assertEqual(response.data['code'], 0)
+
+    def test_user_info(self):
+        jwt_token = self.test_login_admin("123456")
+        url = '/user/modify_user_info'
+        data = {
+            "jwt": jwt_token,
+            "avatar": "http://shieask.com/pic/20373743_20230419102933_f1c88caf-80a9-4d05-b8f2-a3d41f8fea1d.png",
+            "mail": "20373743@buaa.edu.cn"
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['message'], 'modify user information successfully!')
+        self.assertEqual(response.data['code'], 0)
+        jwt_token = self.test_login_admin("123456")
+        url1 = '/user/get_user_info'
+        data1 = {
+            "jwt": jwt_token
+        }
+        response = self.client.post(url1, data1)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['message'], 'get user information successfully!')
+        self.assertEqual(response.data['code'], 0)
+        self.assertEqual(response.data['data']['user_id'], 1)
+        self.assertEqual(response.data['data']['student_id'], "20373743")
+        self.assertEqual(response.data['data']['name'], "ccy")
+        self.assertEqual(response.data['data']['mail'], "20373743@buaa.edu.cn")
+        self.assertEqual(response.data['data']['avatar'],
+                         "http://shieask.com/pic/20373743_20230419102933_f1c88caf-80a9-4d05-b8f2-a3d41f8fea1d.png")
+        return
+
 
