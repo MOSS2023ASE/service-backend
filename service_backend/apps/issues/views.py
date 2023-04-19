@@ -374,7 +374,7 @@ class IssueTagListUpdate(APIView):
 
 
 class IssueFollowCheck(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_follow = FollowIssues.objects.filter(issue=issue, user=action_user)
@@ -391,7 +391,7 @@ class IssueFollowCheck(APIView):
 
 
 class IssueFollow(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_follow = FollowIssues.objects.filter(issue=issue, user=action_user)
@@ -425,7 +425,7 @@ class IssueFollow(APIView):
 
 
 class IssueFavorite(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_like = LikeIssues.objects.filter(issue=issue, user=action_user)
@@ -442,7 +442,7 @@ class IssueFavorite(APIView):
 
 
 class IssueLike(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_like = LikeIssues.objects.filter(issue=issue, user=action_user)
