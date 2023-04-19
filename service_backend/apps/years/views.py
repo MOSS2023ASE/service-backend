@@ -20,7 +20,7 @@ def _find_year():
                     success=False,
                     code=YearErrorCode.YEAR_DOES_NOT_EXIST,
                     message="can't find year!"
-                ))
+                ), status=404)
             return func(*args, **kwargs, year=year)
 
         return wrapper
@@ -49,7 +49,7 @@ class YearCreate(APIView):
                 success=False,
                 code=YearErrorCode.YEAR_SAVE_FAILED,
                 message="can't save year!"
-            ))
+            ), status=404)
 
         return Response(response_json(
             success=True,
@@ -68,7 +68,7 @@ class YearUpdate(APIView):
                 success=False,
                 code=YearErrorCode.YEAR_SAVE_FAILED,
                 message="can't update year!"
-            ))
+            ), status=404)
         return Response(response_json(
             success=True,
             message="update year success!"
@@ -85,7 +85,7 @@ class YearDelete(APIView):
                 success=False,
                 code=YearErrorCode.YEAR_DELETE_FAILED,
                 message="can't delete year!"
-            ))
+            ), status=404)
         return Response(response_json(
             success=True,
             message="delete year success!"

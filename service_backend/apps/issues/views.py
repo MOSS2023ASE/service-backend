@@ -26,7 +26,7 @@ def _find_issue():
                     success=False,
                     code=IssueErrorCode.ISSUE_NOT_FOUND,
                     message="can't find issue!"
-                ))
+                ), status=404)
             return func(*args, **kwargs, issue=issue)
 
         return wrapper
@@ -47,7 +47,7 @@ class IssueGet(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
                 message="you have no access to this issue!"
-            ))
+            ), status=404)
 
         issue_serializer = IssueSerializer(issue)
         data = issue_serializer.data
@@ -80,7 +80,7 @@ class IssueReview(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
                 message="you have no access to this issue!"
-            ))
+            ), status=404)
         issue.reviewer = action_user
         issue.status = IssueStatus.REVIEWING
         try:
@@ -90,7 +90,7 @@ class IssueReview(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_SAVED_FAILED,
                 message="can't review issue!"
-            ))
+            ), status=404)
         # reviewer_issue = ReviewIssues(issue=issue, user=action_user, reviewer=issue.counselor, status=0)
         # try:
         #     reviewer_issue.save()
@@ -99,7 +99,7 @@ class IssueReview(APIView):
         #         success=False,
         #         code=IssueReviewerErrorCode.REVIEWER_ISSUE_SAVED_FAILED,
         #         message="can't review issue!"
-        #     ))
+        #     ), status=404)
 
         return Response(response_json(
             success=True,
@@ -117,7 +117,7 @@ class IssueAgree(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
                 message="you have no access to this issue!"
-            ))
+            ), status=404)
 
         issue.status = IssueStatus.NOT_REVIEW
         try:
@@ -127,7 +127,7 @@ class IssueAgree(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_SAVED_FAILED,
                 message="can't review issue!"
-            ))
+            ), status=404)
         return Response(response_json(
             success=True,
             message="adopt review success!"
@@ -144,7 +144,7 @@ class IssueReject(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
                 message="you have no access to this issue!"
-            ))
+            ), status=404)
 
         issue.counselor = None
         issue.counsel_at = None
@@ -156,7 +156,7 @@ class IssueReject(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_SAVED_FAILED,
                 message="can't reject issue!"
-            ))
+            ), status=404)
         return Response(response_json(
             success=True,
             message="reject issue success!"
@@ -174,7 +174,7 @@ class IssueAdopt(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
                 message="you have no access to this issue!"
-            ))
+            ), status=404)
 
         issue.counselor = action_user
         issue.counsel_at = datetime.datetime.now()
@@ -186,7 +186,7 @@ class IssueAdopt(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_SAVED_FAILED,
                 message="can't adopt issue!"
-            ))
+            ), status=404)
         adopt_issue = AdoptIssues(issue=issue, user=action_user, status=0)
         try:
             adopt_issue.save()
@@ -195,7 +195,7 @@ class IssueAdopt(APIView):
                 success=False,
                 code=IssueReviewerErrorCode.REVIEWER_ISSUE_SAVED_FAILED,
                 message="can't review issue!"
-            ))
+            ), status=404)
 
         return Response(response_json(
             success=True,
@@ -213,7 +213,7 @@ class IssueCancel(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
                 message="you have no access to this issue!"
-            ))
+            ), status=404)
 
         issue.status = IssueStatus.INVALID_ISSUE
         try:
@@ -223,7 +223,7 @@ class IssueCancel(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_SAVED_FAILED,
                 message="can't cancel issue!"
-            ))
+            ), status=404)
         return Response(response_json(
             success=True,
             message="cancel issue success!"
@@ -239,7 +239,7 @@ class IssueClassify(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
                 message="you have no access to this issue!"
-            ))
+            ), status=404)
 
         reviewer_issue = ReviewIssues(issue=issue, user=action_user, reviewer=issue.counselor, status=0)
         try:
@@ -249,7 +249,7 @@ class IssueClassify(APIView):
                 success=False,
                 code=IssueReviewerErrorCode.REVIEWER_ISSUE_SAVED_FAILED,
                 message="can't review issue!"
-            ))
+            ), status=404)
 
         if request.data['is_valid'] == "1":
             issue.status = IssueStatus.VALID_ISSUE
@@ -260,7 +260,7 @@ class IssueClassify(APIView):
                 success=False,
                 code=OtherErrorCode.UNEXPECTED_JSON_FORMAT,
                 message="is_valid is not valid!"
-            ))
+            ), status=404)
         try:
             issue.save()
         except Exception as e:
@@ -268,7 +268,7 @@ class IssueClassify(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_SAVED_FAILED,
                 message="can't classify issue!"
-            ))
+            ), status=404)
         return Response(response_json(
             success=True,
             message="classify issue success!"
@@ -284,7 +284,7 @@ class IssueReadopt(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
                 message="you have no access to this issue!"
-            ))
+            ), status=404)
 
         issue.status = IssueStatus.ADOPTING
         issue.counselor = action_user
@@ -298,7 +298,7 @@ class IssueReadopt(APIView):
                 success=False,
                 code=IssueReviewerErrorCode.REVIEWER_ISSUE_SAVED_FAILED,
                 message="can't review issue!"
-            ))
+            ), status=404)
 
         try:
             issue.save()
@@ -307,7 +307,7 @@ class IssueReadopt(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_SAVED_FAILED,
                 message="can't readopt issue!"
-            ))
+            ), status=404)
         return Response(response_json(
             success=True,
             message="readopt issue success!"
@@ -353,7 +353,7 @@ class IssueTagListUpdate(APIView):
                         success=False,
                         code=IssueTagErrorCode.ISSUE_TAG_SAVED_FAILED,
                         message="can't save issue tag!"
-                    ))
+                    ), status=404)
         issue_tags = IssueTag.objects.filter(issue=issue)
         now_tags = [issue_tag.tag for issue_tag in issue_tags]
         for tag in now_tags:
@@ -366,7 +366,7 @@ class IssueTagListUpdate(APIView):
                         success=False,
                         code=IssueTagErrorCode.ISSUE_TAG_DELETE_FAILED,
                         message="can't delete issue tag!"
-                    ))
+                    ), status=404)
 
         return Response(response_json(
             success=True
@@ -404,7 +404,7 @@ class IssueFollow(APIView):
                     success=False,
                     code=IssueFollowErrorCode.ISSUE_FOLLOW_SAVED_FAILED,
                     message="follow issue failed!"
-                ))
+                ), status=404)
             return Response(response_json(
                 success=True,
                 data={"is_follow": 0}
@@ -417,7 +417,7 @@ class IssueFollow(APIView):
                     success=False,
                     code=IssueFollowErrorCode.ISSUE_FOLLOW_DELETE_FAILED,
                     message="cancel follow failed!"
-                ))
+                ), status=404)
             return Response(response_json(
                 success=True,
                 data={"is_follow": 1}
@@ -455,7 +455,7 @@ class IssueLike(APIView):
                     success=False,
                     code=IssueLikeErrorCode.ISSUE_LIKE_SAVED_FAILED,
                     message="like issue failed!!"
-                ))
+                ), status=404)
             return Response(response_json(
                 success=True,
                 data={"is_like": 1}
@@ -467,7 +467,7 @@ class IssueLike(APIView):
                 return Response(response_json(
                     success=False,
                     code=IssueLikeErrorCode.ISSUE_LIKE_DELETE_FAILED
-                ))
+                ), status=404)
             return Response(response_json(
                 success=True,
                 data={"is_like": 0}
@@ -489,7 +489,7 @@ class IssueUpdate(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_SAVED_FAILED,
                 message="can't save issue!"
-            ))
+            ), status=404)
         return Response(response_json(
             success=True
         ))
@@ -512,7 +512,7 @@ class IssueCommit(APIView):
                 success=False,
                 code=IssueErrorCode.ISSUE_SAVED_FAILED,
                 message="can't save issue!"
-            ))
+            ), status=404)
 
         return Response(response_json(
             success=True,
@@ -530,6 +530,8 @@ class IssueSearch(APIView):
         page_no = request.data['page_no']
         issue_per_page = request.data['issue_per_page']
         issues = Issue.objects.all()
+        if keyword:
+            issues = Issue.objects.filter(title__contains=keyword)
 
         if status_list:
             q = []
@@ -547,20 +549,20 @@ class IssueSearch(APIView):
                 q = q.union(issues.filter(tag_id=tag))
             issues = issues & q
 
-        # if order == 0:
-        #     issues = issues.order_by('created_at')
-        # elif order == 1:
-        #     issues = issues.order_by('-created_at')
-        # else:
-        #     # TODO
-        #     issues = issues
+        if order == 0:
+            issues = issues.order_by('created_at')
+        elif order == 1:
+            issues = issues.order_by('-created_at')
+        else:
+            pass
 
         # 0：最近优先，1：最早优先，2：最热优先，3：综合排序（综合排序方式待定，可以先随便排，之后再调整）
         begin = (page_no - 1) * issue_per_page
         end = page_no * issue_per_page
         issues = issues[begin:end]
         total_page = math.ceil(len(issues) / issue_per_page)
-        issue_list = IssueSearchSerializer(issues, many=True).data
+        issue_list = IssueSearchSerializer(issues, many=True)
+        issue_list = issue_list.data
         return Response(response_json(
             success=True,
             data={
@@ -582,7 +584,7 @@ def _find_comment():
                     success=False,
                     code=CommentErrorCode.COMMENT_NOT_FOUND,
                     message="can't find comment!"
-                ))
+                ), status=404)
             return func(*args, **kwargs, comment=comment)
 
         return wrapper
@@ -614,7 +616,7 @@ class CommentCreate(APIView):
                 success=False,
                 code=CommentErrorCode.COMMENT_SAVED_FAILED,
                 message="can't save comment!"
-            ))
+            ), status=404)
 
         return Response(response_json(
             success=True,
@@ -634,7 +636,7 @@ class CommentUpdate(APIView):
                 success=False,
                 code=CommentErrorCode.COMMENT_SAVED_FAILED,
                 message="can't save comment!"
-            ))
+            ), status=404)
 
         return Response(response_json(
             success=True,
@@ -652,7 +654,7 @@ class CommentDelete(APIView):
                 success=False,
                 code=CommentErrorCode.COMMENT_DELETE_FAILED,
                 message="can't delete comment!"
-            ))
+            ), status=404)
 
         return Response(response_json(
             success=True,

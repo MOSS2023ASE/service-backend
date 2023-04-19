@@ -21,7 +21,7 @@ def _find_tag():
                     success=False,
                     code=TagErrorCode.TAG_DOES_NOT_EXIST,
                     message="can't find tag!"
-                ))
+                ), status=404)
             return func(*args, **kwargs, tag=tag)
 
         return wrapper
@@ -51,7 +51,7 @@ class TagCreate(APIView):
                 success=False,
                 code=TagErrorCode.TAG_SAVE_FAILED,
                 message="can't save tag!"
-            ))
+            ), status=404)
 
         return Response(response_json(
             success=True,
@@ -70,7 +70,7 @@ class TagUpdate(APIView):
                 success=False,
                 code=TagErrorCode.TAG_SAVE_FAILED,
                 message="can't update tag!"
-            ))
+            ), status=404)
 
         return Response(response_json(
             success=True,
@@ -88,7 +88,7 @@ class TagDelete(APIView):
                 success=False,
                 code=TagErrorCode.TAG_DELETE_FAILED,
                 message="can't delete tag!"
-            ))
+            ), status=404)
         return Response(response_json(
             success=True,
             message="delete tag success!"

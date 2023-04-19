@@ -22,7 +22,7 @@ def _find_subject():
                     success=False,
                     code=SubjectErrorCode.SUBJECT_DOES_NOT_EXIST,
                     message="can't find subject!"
-                ))
+                ), status=404)
             return func(*args, **kwargs, subject=subject)
 
         return wrapper
@@ -39,7 +39,7 @@ class SubjectList(APIView):
                 success=False,
                 code=YearErrorCode.YEAR_DOES_NOT_EXIST,
                 message="can't find year!"
-            ))
+            ), status=404)
         subject_serializer = SubjectSerializer(year.subjects, many=True)
         data = {'subject_list': subject_serializer.data}
         return Response(response_json(
@@ -59,7 +59,7 @@ class SubjectCreate(APIView):
                 success=False,
                 code=YearErrorCode.YEAR_DOES_NOT_EXIST,
                 message="can't find year!"
-            ))
+            ), status=404)
 
         subject = Subject(name=name, content=content, year=year)
         try:
@@ -69,7 +69,7 @@ class SubjectCreate(APIView):
                 success=False,
                 code=SubjectErrorCode.SUBJECT_SAVE_FAILED,
                 message="can't save subject!"
-            ))
+            ), status=404)
 
         return Response(response_json(
             success=True,
@@ -89,7 +89,7 @@ class SubjectUpdate(APIView):
                 success=False,
                 code=SubjectErrorCode.SUBJECT_SAVE_FAILED,
                 message="can't update subject!"
-            ))
+            ), status=404)
 
         return Response(response_json(
             success=True,
@@ -107,7 +107,7 @@ class SubjectDelete(APIView):
                 success=False,
                 code=SubjectErrorCode.SUBJECT_DELETE_FAILED,
                 message="can't delete subject!"
-            ))
+            ), status=404)
         return Response(response_json(
             success=True,
             message="delete subject success!"

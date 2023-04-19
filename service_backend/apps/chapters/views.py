@@ -22,7 +22,7 @@ def _find_chapter():
                     success=False,
                     code=ChapterErrorCode.CHAPTER_DOES_NOT_EXIST,
                     message="can't find chapter!"
-                ))
+                ), status=404)
             return func(*args, **kwargs, chapter=chapter)
 
         return wrapper
@@ -39,7 +39,7 @@ class ChapterList(APIView):
                 success=False,
                 code=SubjectErrorCode.SUBJECT_DOES_NOT_EXIST,
                 message="can't find subject!"
-            ))
+            ), status=404)
         chapter_serializer = ChapterSerializer(subject.chapters, many=True)
         data = {'chapter_list': chapter_serializer.data}
         return Response(response_json(
@@ -57,7 +57,7 @@ class ChapterCreate(APIView):
                 success=False,
                 code=SubjectErrorCode.SUBJECT_DOES_NOT_EXIST,
                 message="can't find subject!"
-            ))
+            ), status=404)
         name = request.data['name']
         content = request.data['content']
         chapter = Chapter(name=name, content=content, subject=subject)
@@ -68,7 +68,7 @@ class ChapterCreate(APIView):
                 success=False,
                 code=ChapterErrorCode.CHAPTER_SAVE_FAILED,
                 message="can't save chapter!"
-            ))
+            ), status=404)
 
         return Response(response_json(
             success=True,
@@ -88,7 +88,7 @@ class ChapterUpdate(APIView):
                 success=False,
                 code=ChapterErrorCode.CHAPTER_SAVE_FAILED,
                 message="can't update chapter!"
-            ))
+            ), status=404)
 
         return Response(response_json(
             success=True,
@@ -106,7 +106,7 @@ class ChapterDelete(APIView):
                 success=False,
                 code=ChapterErrorCode.CHAPTER_DELETE_FAILED,
                 message="can't delete chapter!"
-            ))
+            ), status=404)
         return Response(response_json(
             success=True,
             message="delete chapter success!"
