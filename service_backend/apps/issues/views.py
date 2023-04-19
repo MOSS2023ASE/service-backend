@@ -530,15 +530,32 @@ class IssueSearch(APIView):
         page_no = request.data['page_no']
         issue_per_page = request.data['issue_per_page']
         issues = Issue.objects.all()
-        for status in status_list:
-            issues = issues.filter(status=status)
-        for chapter in chapter_list:
-            issues = issues.filter(chapter_id=chapter)
-        for tag in tag_list:
-            issues = issues.filter(tag_id=tag)
+
+        if status_list:
+            q = []
+            for status in status_list:
+                q = q.union(issues.filter(status=status))
+            issues = issues & q
+        if chapter_list:
+            q = []
+            for chapter in chapter_list:
+                q = q.union(issues.filter(chapter_id=chapter))
+            issues = issues & q
+        if tag_list:
+            q = []
+            for tag in tag_list:
+                q = q.union(issues.filter(tag_id=tag))
+            issues = issues & q
+
+        # if order == 0:
+        #     issues = issues.order_by('created_at')
+        # elif order == 1:
+        #     issues = issues.order_by('-created_at')
+        # else:
+        #     # TODO
+        #     issues = issues
 
         # 0：最近优先，1：最早优先，2：最热优先，3：综合排序（综合排序方式待定，可以先随便排，之后再调整）
-        issues = issues.order_by('created_at')
         begin = (page_no - 1) * issue_per_page
         end = page_no * issue_per_page
         issues = issues[begin:end]
