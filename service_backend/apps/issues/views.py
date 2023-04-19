@@ -374,7 +374,7 @@ class IssueTagListUpdate(APIView):
 
 
 class IssueFollowCheck(APIView):
-    @check_role([UserRole.STUDENT, ])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_follow = FollowIssues.objects.filter(issue=issue, user=action_user)
@@ -391,7 +391,7 @@ class IssueFollowCheck(APIView):
 
 
 class IssueFollow(APIView):
-    @check_role([UserRole.STUDENT, ])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_follow = FollowIssues.objects.filter(issue=issue, user=action_user)
@@ -425,7 +425,7 @@ class IssueFollow(APIView):
 
 
 class IssueFavorite(APIView):
-    @check_role([UserRole.STUDENT, ])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_like = LikeIssues.objects.filter(issue=issue, user=action_user)
@@ -442,7 +442,7 @@ class IssueFavorite(APIView):
 
 
 class IssueLike(APIView):
-    @check_role([UserRole.STUDENT, ])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_like = LikeIssues.objects.filter(issue=issue, user=action_user)
@@ -557,10 +557,10 @@ class IssueSearch(APIView):
             pass
 
         # 0：最近优先，1：最早优先，2：最热优先，3：综合排序（综合排序方式待定，可以先随便排，之后再调整）
+        total_page = math.ceil(len(issues) / issue_per_page)
         begin = (page_no - 1) * issue_per_page
         end = page_no * issue_per_page
         issues = issues[begin:end]
-        total_page = math.ceil(len(issues) / issue_per_page)
         issue_list = IssueSearchSerializer(issues, many=True)
         issue_list = issue_list.data
         return Response(response_json(
