@@ -18,6 +18,8 @@ class Issue(MyModel):
     status = models.IntegerField()
     anonymous = models.IntegerField()
     score = models.IntegerField(null=True)
+    likes = models.IntegerField(default=0)
+    follows = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'issues'

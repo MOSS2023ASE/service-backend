@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from service_backend.apps.chapters.views import _find_chapter
+from service_backend.apps.subjects.models import UserSubject
 from service_backend.apps.tags.models import IssueTag, Tag
 from service_backend.apps.users.models import User
 from service_backend.apps.issues.models import Issue, Comment, LikeIssues, FollowIssues, AdoptIssues, ReviewIssues
@@ -32,6 +33,47 @@ def _find_issue():
         return wrapper
 
     return decorated
+
+
+def status_trans_permit(issue, action_user):
+    status = [0, 0, 0, 0, 0, 0, 0]
+    if issue.status == IssueStatus.NOT_ADOPT and \
+            action_user.user_role == UserRole.TUTOR and \
+            UserSubject.objects.filter(user=action_user, subject=issue.chapter.subject):
+        status[0] = 1
+    if issue.status == IssueStatus.NOT_ADOPT and \
+            action_user.user_role == UserRole.STUDENT and \
+            issue.user == action_user:
+        status[1] = 1
+    if issue.status == IssueStatus.ADOPTING and \
+            action_user.user_role == UserRole.STUDENT and \
+            issue.user == action_user:
+        status[2] = 1
+        status[3] = 1
+    if issue.status == IssueStatus.NOT_REVIEW and \
+            action_user.user_role == UserRole.TUTOR and \
+            UserSubject.objects.filter(user=action_user, subject=issue.chapter.subject) and \
+            issue.counselor != action_user:
+        status[4] = 1
+    if issue.status == IssueStatus.REVIEWING and \
+            action_user.user_role == UserRole.TUTOR and \
+            issue.reviewer == action_user:
+        status[5] = 1
+        status[6] = 1
+    return status
+
+
+def allow_comment(issue, action_user):
+    allow = 0
+    if issue.status == IssueStatus.NOT_ADOPT and \
+            action_user.user_role == UserRole.STUDENT and \
+            action_user == issue.user:
+        allow = 1
+    if issue.status == IssueStatus.ADOPTING and \
+            (action_user.user_role == UserRole.STUDENT or action_user.user_role == UserRole.TUTOR) and \
+            (action_user == issue.user or action_user == issue.counselor):
+        allow = 1
+    return allow
 
 
 # Create your views here.
@@ -63,6 +105,8 @@ class IssueGet(APIView):
             "user_name": reviewer_issue.user.name,
             "user_avatar": reviewer_issue.user.avatar
         } for reviewer_issue in reviewer_issues]
+        data['allow_comment'] = allow_comment(issue, action_user)
+        data['status_trans_permit'] = status_trans_permit(issue, action_user)
         data['counselor_list'] = counselor_list
         data['reviewer_list'] = reviewer_list
         return Response(response_json(
@@ -130,7 +174,7 @@ class IssueAgree(APIView):
             ), status=404)
         return Response(response_json(
             success=True,
-            message="adopt review success!"
+            message="agree review success!"
         ))
 
 
@@ -251,9 +295,9 @@ class IssueClassify(APIView):
                 message="can't review issue!"
             ), status=404)
 
-        if request.data['is_valid'] == "1":
+        if request.data['is_valid'] == 1:
             issue.status = IssueStatus.VALID_ISSUE
-        elif request.data['is_valid'] == "0":
+        elif request.data['is_valid'] == 0:
             issue.status = IssueStatus.INVALID_ISSUE
         else:
             return Response(response_json(
@@ -381,12 +425,18 @@ class IssueFollowCheck(APIView):
         if not is_follow:
             return Response(response_json(
                 success=True,
-                data={"is_follow": 1}
+                data={
+                    "is_follow": 1,
+                    "follow_count": issue.follows
+                }
             ))
         else:
             return Response(response_json(
                 success=True,
-                data={"is_follow": 0}
+                data={
+                    "is_follow": 0,
+                    "follow_count": issue.follows
+                }
             ))
 
 
@@ -397,8 +447,10 @@ class IssueFollow(APIView):
         is_follow = FollowIssues.objects.filter(issue=issue, user=action_user)
         if not is_follow:
             follow = FollowIssues(issue=issue, user=action_user)
+            issue.follows = issue.follows + 1
             try:
                 follow.save()
+                issue.save()
             except Exception as e:
                 return Response(response_json(
                     success=False,
@@ -407,11 +459,16 @@ class IssueFollow(APIView):
                 ), status=404)
             return Response(response_json(
                 success=True,
-                data={"is_follow": 0}
+                data={
+                    "is_follow": 0,
+                    "follow_count": issue.follows
+                }
             ))
         else:
             try:
                 is_follow.delete()
+                issue.follows = issue.follows - 1
+                issue.save()
             except Exception as e:
                 return Response(response_json(
                     success=False,
@@ -420,7 +477,10 @@ class IssueFollow(APIView):
                 ), status=404)
             return Response(response_json(
                 success=True,
-                data={"is_follow": 1}
+                data={
+                    "is_follow": 1,
+                    "follow_count": issue.follows
+                }
             ))
 
 
@@ -432,12 +492,18 @@ class IssueFavorite(APIView):
         if not is_like:
             return Response(response_json(
                 success=True,
-                data={"is_like": 0}
+                data={
+                    "is_like": 0,
+                    "like_count": issue.likes
+                }
             ))
         else:
             return Response(response_json(
                 success=True,
-                data={"is_like": 1}
+                data={
+                    "is_like": 1,
+                    "like_count": issue.likes
+                }
             ))
 
 
@@ -448,8 +514,10 @@ class IssueLike(APIView):
         is_like = LikeIssues.objects.filter(issue=issue, user=action_user)
         if not is_like:
             like = LikeIssues(issue=issue, user=action_user)
+            issue.likes = issue.likes + 1
             try:
                 like.save()
+                issue.save()
             except Exception as e:
                 return Response(response_json(
                     success=False,
@@ -458,11 +526,16 @@ class IssueLike(APIView):
                 ), status=404)
             return Response(response_json(
                 success=True,
-                data={"is_like": 1}
+                data={
+                    "is_like": 1,
+                    "like_count": issue.likes
+                }
             ))
         else:
             try:
                 is_like.delete()
+                issue.likes = issue.likes - 1
+                issue.save()
             except Exception as e:
                 return Response(response_json(
                     success=False,
@@ -470,7 +543,10 @@ class IssueLike(APIView):
                 ), status=404)
             return Response(response_json(
                 success=True,
-                data={"is_like": 0}
+                data={
+                    "is_like": 0,
+                    "like_count": issue.likes
+                }
             ))
 
 
@@ -521,7 +597,8 @@ class IssueCommit(APIView):
 
 
 class IssueSearch(APIView):
-    def post(self, request):
+    @check_role(UserRole.ALL_USERS)
+    def post(self, request, action_user):
         keyword = request.data['keyword']
         tag_list = request.data['tag_list']
         status_list = request.data['status_list']
@@ -563,6 +640,9 @@ class IssueSearch(APIView):
         issues = issues[begin:end]
         issue_list = IssueSearchSerializer(issues, many=True)
         issue_list = issue_list.data
+        for issue_json in issue_list:
+            issue = Issue.objects.get(id=issue_json['issue_id'])
+            issue_json['status_trans_permit'] = status_trans_permit(issue, action_user)
         return Response(response_json(
             success=True,
             data={
