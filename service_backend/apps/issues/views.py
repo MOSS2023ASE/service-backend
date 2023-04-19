@@ -72,7 +72,7 @@ class IssueGet(APIView):
 
 
 class IssueReview(APIView):
-    @check_role([UserRole.TUTOR, ])
+    @check_role([UserRole.TUTOR, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         if action_user.id == issue.counselor_id:
@@ -108,7 +108,7 @@ class IssueReview(APIView):
 
 
 class IssueAgree(APIView):
-    @check_role([UserRole.STUDENT, ])
+    @check_role([UserRole.STUDENT, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         if action_user.user_role == UserRole.STUDENT and \
@@ -135,7 +135,7 @@ class IssueAgree(APIView):
 
 
 class IssueReject(APIView):
-    @check_role([UserRole.STUDENT, ])
+    @check_role([UserRole.STUDENT, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         if action_user.user_role == UserRole.STUDENT and \
@@ -164,7 +164,7 @@ class IssueReject(APIView):
 
 
 class IssueAdopt(APIView):
-    @check_role([UserRole.TUTOR, ])
+    @check_role([UserRole.TUTOR, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         adopt_issues = AdoptIssues.objects.filter(issue=issue).all()
@@ -204,7 +204,7 @@ class IssueAdopt(APIView):
 
 
 class IssueCancel(APIView):
-    @check_role([UserRole.STUDENT, ])
+    @check_role([UserRole.STUDENT, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         if action_user.user_role == UserRole.STUDENT and \
@@ -231,7 +231,7 @@ class IssueCancel(APIView):
 
 
 class IssueClassify(APIView):
-    @check_role([UserRole.TUTOR, ])
+    @check_role([UserRole.TUTOR, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         if action_user.id != issue.reviewer_id:
@@ -276,7 +276,7 @@ class IssueClassify(APIView):
 
 
 class IssueReadopt(APIView):
-    @check_role([UserRole.TUTOR, ])
+    @check_role([UserRole.TUTOR, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         if action_user.id != issue.reviewer_id:
@@ -336,7 +336,7 @@ class IssueTagList(APIView):
 
 
 class IssueTagListUpdate(APIView):
-    @check_role([UserRole.TUTOR, ])
+    @check_role([UserRole.TUTOR, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         # 是否有更加优美的实现方式？
@@ -374,7 +374,7 @@ class IssueTagListUpdate(APIView):
 
 
 class IssueFollowCheck(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_follow = FollowIssues.objects.filter(issue=issue, user=action_user)
@@ -391,7 +391,7 @@ class IssueFollowCheck(APIView):
 
 
 class IssueFollow(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_follow = FollowIssues.objects.filter(issue=issue, user=action_user)
@@ -425,7 +425,7 @@ class IssueFollow(APIView):
 
 
 class IssueFavorite(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_like = LikeIssues.objects.filter(issue=issue, user=action_user)
@@ -442,7 +442,7 @@ class IssueFavorite(APIView):
 
 
 class IssueLike(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         is_like = LikeIssues.objects.filter(issue=issue, user=action_user)
@@ -496,7 +496,7 @@ class IssueUpdate(APIView):
 
 
 class IssueCommit(APIView):
-    @check_role([UserRole.STUDENT, ])
+    @check_role([UserRole.STUDENT, UserRole.ADMIN, ])
     @_find_chapter()
     def post(self, request, chapter, action_user):
         title = request.data['title']
@@ -604,7 +604,7 @@ class CommentList(APIView):
 
 
 class CommentCreate(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         content = request.data['content']
