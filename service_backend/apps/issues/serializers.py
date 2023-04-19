@@ -47,7 +47,7 @@ class IssueSerializer(serializers.ModelSerializer):
         return obj.chapter.subject.name
 
     def get_tag_list(self, obj):
-        issue_tags = obj.issue_tags
+        issue_tags = obj.issue_tags.all()
         tags_content = [issue_tag.tag.content for issue_tag in issue_tags]
         return tags_content
 
@@ -132,16 +132,28 @@ class CommentSerializer(serializers.ModelSerializer):
         return obj.updated_at
 
     def get_user_id(self, obj):
-        return obj.user.id
+        if obj.issue.user_id == obj.user_id and \
+                obj.issue.anonymous == 1:
+            return 0
+        else:
+            return obj.user.id
 
     def get_user_role(self, obj):
         return obj.user.user_role
 
     def get_avatar(self, obj):
-        return obj.user.avatar
+        if obj.issue.user_id == obj.user_id and \
+                obj.issue.anonymous == 1:
+            return None
+        else:
+            return obj.user.avatar
 
     def get_name(self, obj):
-        return obj.user.name
+        if obj.issue.user_id == obj.user_id and \
+                obj.issue.anonymous == 1:
+            return "匿名"
+        else:
+            return obj.user.name
 
     class Meta:
         model = Comment

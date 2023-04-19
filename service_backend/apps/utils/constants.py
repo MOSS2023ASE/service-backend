@@ -64,6 +64,7 @@ class IssueErrorCode:
     ADOPT_ISSUE_QUERY_FAILED = 605
     FOLLOW_ISSUE_QUERY_FAILED = 606
     ASK_ISSUE_QUERY_FAILED = 607
+    ISSUE_ACTION_REJECT = 608
 
 
 class CommentErrorCode:
