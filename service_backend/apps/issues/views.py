@@ -135,7 +135,7 @@ class IssueAgree(APIView):
 
 
 class IssueReject(APIView):
-    @check_role([UserRole.STUDENT])
+    @check_role([UserRole.STUDENT, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         if action_user.user_role == UserRole.STUDENT and \
@@ -204,7 +204,7 @@ class IssueAdopt(APIView):
 
 
 class IssueCancel(APIView):
-    @check_role([UserRole.STUDENT])
+    @check_role([UserRole.STUDENT, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         if action_user.user_role == UserRole.STUDENT and \
@@ -604,7 +604,7 @@ class CommentList(APIView):
 
 
 class CommentCreate(APIView):
-    @check_role([UserRole.STUDENT, UserRole.TUTOR])
+    @check_role([UserRole.STUDENT, UserRole.TUTOR, ])
     @_find_issue()
     def post(self, request, issue, action_user):
         content = request.data['content']
