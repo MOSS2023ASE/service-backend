@@ -126,7 +126,7 @@ class IssueAPITestCase(APITestCase):
         response = self.client.post(review_url, tutor_data_2)
         self.assertEqual(response.data['code'], 0)
         tutor_data_2["is_valid"] = 0
-        response = self.client.post(classify_url, tutor_data_2)
+        response = self.client.post(classify_url, json.dumps(tutor_data_2), content_type='application/json')
         self.assertEqual(response.data['code'], 0)
         return
 

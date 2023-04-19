@@ -67,6 +67,8 @@ class IssueSearchSerializer(serializers.ModelSerializer):
     subject_id = serializers.SerializerMethodField()
     subject_name = serializers.SerializerMethodField()
     issue_title = serializers.SerializerMethodField()
+    like_count = serializers.SerializerMethodField()
+    follow_count = serializers.SerializerMethodField()
 
     def get_issue_id(self, obj):
         return obj.id
@@ -110,11 +112,17 @@ class IssueSearchSerializer(serializers.ModelSerializer):
     def get_reviewer_id(self, obj):
         return obj.reviewer.id
 
+    def get_like_count(self, obj):
+        return obj.likes
+
+    def get_follow_count(self, obj):
+        return obj.follows
+
     class Meta:
         model = Issue
         fields = ['issue_id', 'issue_title', 'content', 'user_id', 'user_name', 'user_avatar', 'chapter_id',
                   'chapter_name', 'subject_id', 'subject_name', 'status', 'anonymous', 'score',
-                  'created_at', 'updated_at', 'counselor_id', 'reviewer_id']
+                  'created_at', 'updated_at', 'counselor_id', 'reviewer_id', 'like_count', 'follow_count']
 
 
 class CommentSerializer(serializers.ModelSerializer):
