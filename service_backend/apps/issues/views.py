@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 from service_backend.apps.chapters.views import _find_chapter
 from service_backend.apps.subjects.models import UserSubject
 from service_backend.apps.tags.models import IssueTag, Tag
-from service_backend.apps.users.models import User
 from service_backend.apps.issues.models import Issue, Comment, LikeIssues, FollowIssues, AdoptIssues, ReviewIssues
 from service_backend.apps.utils.constants import UserRole, IssueStatus, IssueErrorCode, CommentErrorCode, \
     IssueLikeErrorCode, IssueFollowErrorCode, IssueTagErrorCode, IssueReviewerErrorCode, OtherErrorCode
