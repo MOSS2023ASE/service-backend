@@ -1,3 +1,4 @@
+import json
 from rest_framework.test import APITestCase
 from service_backend.apps.users.models import User
 from service_backend.apps.issues.models import Issue, ReviewIssues, AdoptIssues, LikeIssues, FollowIssues
@@ -6,7 +7,6 @@ from service_backend.apps.chapters.models import Chapter
 from service_backend.apps.subjects.models import Subject, UserSubject
 from service_backend.apps.utils.views import encode_password, decode_jwt
 from service_backend.apps.utils.constants import *
-
 
 # Create your tests here.
 class UserAPITestCase(APITestCase):
@@ -67,7 +67,7 @@ class UserAPITestCase(APITestCase):
             "student_id": "20373743",
             "password": password
         }
-        response = self.client.post(url, data)
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['message'], 'login success!')
         self.assertEqual(response.data['code'], 0)
@@ -81,7 +81,7 @@ class UserAPITestCase(APITestCase):
             "student_id": "20373044",
             "password": "123456"
         }
-        response = self.client.post(url, data)
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['message'], 'login success!')
         self.assertEqual(response.data['code'], 0)
@@ -95,7 +95,7 @@ class UserAPITestCase(APITestCase):
             "student_id": "20373045",
             "password": "123456"
         }
-        response = self.client.post(url, data)
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['message'], 'login success!')
         self.assertEqual(response.data['code'], 0)
@@ -112,7 +112,7 @@ class UserAPITestCase(APITestCase):
             "password_old": "123456",
             "password_new": "111111"
         }
-        response = self.client.post(url, data)
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['message'], 'modify password successfully!')
         self.assertEqual(response.data['code'], 0)
@@ -122,7 +122,7 @@ class UserAPITestCase(APITestCase):
             "student_id": "20373743",
             "password": "111111"
         }
-        response = self.client.post(url2, data2)
+        response = self.client.post(url2, data=json.dumps(data2), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['message'], 'login success!')
         self.assertEqual(response.data['code'], 0)
@@ -133,7 +133,7 @@ class UserAPITestCase(APITestCase):
             "password_old": "111111",
             "password_new": "123456"
         }
-        response = self.client.post(url, data)
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['message'], 'modify password successfully!')
         self.assertEqual(response.data['code'], 0)
@@ -146,7 +146,7 @@ class UserAPITestCase(APITestCase):
             "avatar": "http://shieask.com/pic/20373743_20230419102933_f1c88caf-80a9-4d05-b8f2-a3d41f8fea1d.png",
             "mail": "20373743@buaa.edu.cn"
         }
-        response = self.client.post(url, data)
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['message'], 'modify user information successfully!')
         self.assertEqual(response.data['code'], 0)
@@ -167,4 +167,37 @@ class UserAPITestCase(APITestCase):
                          "http://shieask.com/pic/20373743_20230419102933_f1c88caf-80a9-4d05-b8f2-a3d41f8fea1d.png")
         return
 
-
+    def test_user_subject(self):
+        jwt_token = self.test_login_admin()
+        url1 = '/user/modify_user_subject'
+        data1 = {
+            "jwt": jwt_token,
+            "tutor_id": 4,
+            "subject_id_list": [1, 2]
+        }
+        response = self.client.post(url1, data=json.dumps(data1), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['message'], 'subject list update successfully!')
+        self.assertEqual(response.data['code'], 0)
+        url2 = '/user/get_user_subject'
+        data2 = {
+            "jwt": jwt_token,
+            "tutor_id": 4,
+        }
+        response = self.client.post(url2, data=json.dumps(data2), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['message'], "get tutor's subjects successfully!")
+        self.assertEqual(response.data['code'], 0)
+        # print(response.data['data']['subject_list'])
+        self.assertEqual(len(response.data['data']['subject_list']), 2)
+        url3 = '/user/check_user_subject'
+        data3 = {
+            "jwt": jwt_token,
+            "tutor_id": 4,
+            "subject_id": 2
+        }
+        response = self.client.post(url3, data=json.dumps(data3), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['message'], 'user is a tutor of this subject!')
+        self.assertEqual(response.data['code'], 0)
+        self.assertEqual(response.data['data']['result'], 1)
