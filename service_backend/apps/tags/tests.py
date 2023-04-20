@@ -9,9 +9,9 @@ from service_backend.apps.years.serializers import YearSerializer
 # Create your tests here.
 class SubjectAPITestCase(APITestCase):
     def setUp(self):
-        tag = Tag(content="tag_1")
+        tag = Tag(id=1, content="tag_1")
         tag.save()
-        tag = Tag(content="tag_2")
+        tag = Tag(id=2, content="tag_2")
         tag.save()
         return
 
