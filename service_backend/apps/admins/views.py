@@ -4,7 +4,7 @@ from service_backend.apps.users.models import User
 from service_backend.apps.issues.models import Issue
 from service_backend.apps.users.serializers import UserSerializer
 from service_backend.apps.utils.views import response_json, encode_password, check_role
-from service_backend.apps.utils.constants import UserErrorCode, UserRole, OtherErrorCode, IssueErrorCode
+from service_backend.apps.utils.constants import UserErrorCode, UserRole, OtherErrorCode, IssueErrorCode, DEFAULT_AVATAR
 
 
 # Create your views here.
@@ -21,9 +21,10 @@ class CreateUser(APIView):
                 user = User.objects.get(student_id=student_id)
                 user.name, user.password_digest, user.user_role = name, encode_password(password), role
                 user.mail = user.mail if user.mail else f"{student_id}@buaa.edu.cn"
+                user.avatar = user.avatar if user.avatar else DEFAULT_AVATAR
             else:
                 user = User(student_id=student_id, name=name, password_digest=encode_password(password), user_role=role,
-                            mail=f"{student_id}@buaa.edu.cn")
+                            mail=f"{student_id}@buaa.edu.cn", avatar=DEFAULT_AVATAR)
             user.save()
         except Exception as _e:
             return Response(response_json(
@@ -62,9 +63,10 @@ class CreateUserBatch(APIView):
                     user = User.objects.get(student_id=student_id)
                     user.name, user.password_digest, user.user_role = name, encode_password(password), role
                     user.mail = user.mail if user.mail else f"{student_id}@buaa.edu.cn"
+                    user.avatar = user.avatar if user.avatar else DEFAULT_AVATAR
                 else:
                     user = User(student_id=student_id, name=name, password_digest=encode_password(password),
-                                user_role=role, mail=f"{student_id}@buaa.edu.cn")
+                                user_role=role, mail=f"{student_id}@buaa.edu.cn", avatar=DEFAULT_AVATAR)
                 user.save()
             except Exception as _e:
                 raise _e
@@ -83,9 +85,9 @@ class CreateUserBatch(APIView):
 class UserList(APIView):
 
     @check_role(UserRole.ADMIN_ONLY)
-    def post(self, request):
-        user = User.objects.all()
-        user_serializar = UserSerializer(user, many=True)
+    def post(self, request, action_user: User = None):
+        user_list = User.objects.all()
+        # user_serializar = UserSerializer(user, many=True)
         return Response(response_json(
             success=True,
             data={
@@ -97,7 +99,7 @@ class UserList(APIView):
                         'user_role': user.user_role,
                         'frozen': user.frozen
                     }
-                    for user in user_serializar.data
+                    for user in user_list
                 ]
             }
         ))
