@@ -83,12 +83,14 @@ def check_role(role_list: list):
                     code=UserErrorCode.USER_FROZEN,
                     message='your account has been frozen, please contact administrator!'
                 ))
+            # print(user.user_role, role_list)
             if not user.id or not (user.user_role in role_list):
                 return Response(response_json(
                     success=False,
                     code=UserErrorCode.PERMISSION_DENIED,
                     message='permission denied!'
                 ))
+            # print(args[1].data)
             return f(*args, **kwargs, action_user=user)
 
         return wrapper

@@ -10,13 +10,13 @@ from service_backend.apps.utils.constants import UserErrorCode, UserRole, OtherE
 # Create your views here.
 class CreateUser(APIView):
 
-    @check_role([UserRole.ADMIN_ONLY])
+    @check_role(UserRole.ADMIN_ONLY)
     def post(self, request, action_user: User = None):
         # create user
-        try:
-            student_id, name, password, role = request.data['student_id'], request.data['name'], request.data[
+        print(request.data)
+        student_id, name, password, role = request.data['student_id'], request.data['name'], request.data[
                 'password'], request.data['role']
-            print(request.data)
+        try:    
             if User.objects.filter(student_id=student_id).exists():
                 user = User.objects.get(student_id=student_id)
                 user.name, user.password_digest, user.user_role = name, encode_password(password), role
@@ -40,10 +40,14 @@ class CreateUser(APIView):
 
 class CreateUserBatch(APIView):
 
-    @check_role([UserRole.ADMIN_ONLY])
+    @check_role(UserRole.ADMIN_ONLY)
     def post(self, request, action_user: User = None):
         # print('user_id is:' + str(user_id))
         # preprocess list
+        print(4)
+        print(request.data)
+        s = ""
+        s += str(request.data)
         name_list = request.data['name_list']
         student_id_list = request.data['student_id_list']
         password_list = request.data['password_list']
@@ -57,14 +61,21 @@ class CreateUserBatch(APIView):
         # iterate
         for name, student_id, password, role in zip(name_list, student_id_list, password_list, role_list):
             # create user
+            print(3)
+            print(name, student_id, password, role)
             try:
                 if User.objects.filter(student_id=student_id).exists():
+                    print(1)
                     user = User.objects.get(student_id=student_id)
+                    print(user.values())
                     user.name, user.password_digest, user.user_role = name, encode_password(password), role
                     user.mail = user.mail if user.mail else f"{student_id}@buaa.edu.cn"
                 else:
+                    print(2)
+                    print(student_id, name, encode_password(password), role, f"{student_id}@buaa.edu.cn")
                     user = User(student_id=student_id, name=name, password_digest=encode_password(password),
                                 user_role=role, mail=f"{student_id}@buaa.edu.cn")
+                    print(user.values())
                 user.save()
             except Exception as _e:
                 return Response(response_json(
@@ -81,7 +92,7 @@ class CreateUserBatch(APIView):
 
 class UserList(APIView):
 
-    @check_role([UserRole.ADMIN_ONLY])
+    @check_role(UserRole.ADMIN_ONLY)
     def post(self, request):
         user = User.objects.all()
         user_serializar = UserSerializer(user, many=True)
@@ -103,7 +114,7 @@ class UserList(APIView):
 
 
 class UpdateUserRole(APIView):
-    @check_role([UserRole.ADMIN_ONLY])
+    @check_role(UserRole.ADMIN_ONLY)
     def post(self, request, action_user: User = None):
         # get user
         try:
@@ -132,7 +143,7 @@ class UpdateUserRole(APIView):
 
 
 class FreezeUser(APIView):
-    @check_role([UserRole.ADMIN_ONLY])
+    @check_role(UserRole.ADMIN_ONLY)
     def post(self, request, action_user: User = None):
         # get user
         try:
@@ -162,7 +173,7 @@ class FreezeUser(APIView):
 
 class DeleteIssue(APIView):
 
-    @check_role([UserRole.ADMIN_ONLY])
+    @check_role(UserRole.ADMIN_ONLY)
     def post(self, request, action_user: User = None):
         try:
             issue = Issue.objects.get(id=request.data['issue_id'])
