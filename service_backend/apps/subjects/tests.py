@@ -2,7 +2,6 @@ from service_backend.apps.subjects.models import Subject
 from rest_framework.test import APITestCase
 
 from service_backend.apps.years.models import Year
-from service_backend.apps.years.serializers import YearSerializer
 
 
 # Create your tests here.

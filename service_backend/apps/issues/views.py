@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 from service_backend.apps.chapters.views import _find_chapter
 from service_backend.apps.subjects.models import UserSubject
 from service_backend.apps.tags.models import IssueTag, Tag
-from service_backend.apps.users.models import User
 from service_backend.apps.issues.models import Issue, Comment, LikeIssues, FollowIssues, AdoptIssues, ReviewIssues
 from service_backend.apps.utils.constants import UserRole, IssueStatus, IssueErrorCode, CommentErrorCode, \
     IssueLikeErrorCode, IssueFollowErrorCode, IssueTagErrorCode, IssueReviewerErrorCode, OtherErrorCode
@@ -93,13 +92,13 @@ class IssueGet(APIView):
 
         issue_serializer = IssueSerializer(issue)
         data = issue_serializer.data
-        adopter_issues = AdoptIssues.objects.filter(issue=issue)
+        adopter_issues = AdoptIssues.objects.filter(issue=issue).order_by('created_at')
         counselor_list = [{
             "user_id": adopter_issue.user.id,
             "user_name": adopter_issue.user.name,
             "user_avatar": adopter_issue.user.avatar
         } for adopter_issue in adopter_issues]
-        reviewer_issues = ReviewIssues.objects.filter(issue=issue)
+        reviewer_issues = ReviewIssues.objects.filter(issue=issue).order_by('created_at')
         reviewer_list = [{
             "user_id": reviewer_issue.user.id,
             "user_name": reviewer_issue.user.name,
@@ -119,7 +118,8 @@ class IssueReview(APIView):
     @check_role([UserRole.TUTOR, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
-        if action_user.id == issue.counselor_id:
+        if issue.status != IssueStatus.NOT_REVIEW or \
+                action_user.id == issue.counselor_id:
             return Response(response_json(
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
@@ -155,8 +155,9 @@ class IssueAgree(APIView):
     @check_role([UserRole.STUDENT, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
-        if action_user.user_role == UserRole.STUDENT and \
-                action_user.id != issue.user_id:
+        if issue.status != IssueStatus.ADOPTING or \
+                (action_user.user_role == UserRole.STUDENT and
+                 action_user.id != issue.user_id):
             return Response(response_json(
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
@@ -182,8 +183,9 @@ class IssueReject(APIView):
     @check_role([UserRole.STUDENT, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
-        if action_user.user_role == UserRole.STUDENT and \
-                action_user.id != issue.user_id:
+        if issue.status != IssueStatus.ADOPTING and \
+                (action_user.user_role == UserRole.STUDENT and
+                 action_user.id != issue.user_id):
             return Response(response_json(
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
@@ -213,7 +215,8 @@ class IssueAdopt(APIView):
     def post(self, request, issue, action_user):
         adopt_issues = AdoptIssues.objects.filter(issue=issue).all()
         adopted = [adopt_issue.user for adopt_issue in adopt_issues]
-        if action_user in adopted:
+        if issue.status != IssueStatus.NOT_ADOPT or \
+                action_user in adopted:
             return Response(response_json(
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
@@ -251,8 +254,9 @@ class IssueCancel(APIView):
     @check_role([UserRole.STUDENT, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
-        if action_user.user_role == UserRole.STUDENT and \
-                action_user.id != issue.user_id:
+        if issue.status != IssueStatus.NOT_ADOPT or \
+                (action_user.user_role == UserRole.STUDENT and
+                 action_user.id != issue.user_id):
             return Response(response_json(
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
@@ -278,7 +282,8 @@ class IssueClassify(APIView):
     @check_role([UserRole.TUTOR, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
-        if action_user.id != issue.reviewer_id:
+        if issue.status != IssueStatus.REVIEWING or \
+                (action_user.id != issue.reviewer_id):
             return Response(response_json(
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
@@ -323,7 +328,8 @@ class IssueReadopt(APIView):
     @check_role([UserRole.TUTOR, UserRole.ADMIN, ])
     @_find_issue()
     def post(self, request, issue, action_user):
-        if action_user.id != issue.reviewer_id:
+        if issue.status != IssueStatus.REVIEWING or \
+                (action_user.id != issue.reviewer_id):
             return Response(response_json(
                 success=False,
                 code=IssueErrorCode.ISSUE_ACTION_REJECT,
@@ -613,17 +619,17 @@ class IssueSearch(APIView):
         if status_list:
             q = []
             for status in status_list:
-                q = q.union(issues.filter(status=status))
+                q = q.union(issues.filter(status=status)) if q else issues.filter(status=status)
             issues = issues & q
         if chapter_list:
             q = []
             for chapter in chapter_list:
-                q = q.union(issues.filter(chapter_id=chapter))
+                q = q.union(issues.filter(chapter_id=chapter)) if q else issues.filter(chapter_id=chapter)
             issues = issues & q
         if tag_list:
             q = []
             for tag in tag_list:
-                q = q.union(issues.filter(tag_id=tag))
+                q = q.union(issues.filter(tag_id=tag)) if q else issues.filter(tag_id=tag)
             issues = issues & q
 
         if order == 0:

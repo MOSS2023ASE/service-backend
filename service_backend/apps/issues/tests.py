@@ -203,7 +203,7 @@ class IssueAPITestCase(APITestCase):
             "keyword": "",
             "tag_list": [],
             "status_list": [],
-            "chapter_list": [],
+            "chapter_list": [1],
             "order": "",
             "page_no": 1,
             "issue_per_page": 100
