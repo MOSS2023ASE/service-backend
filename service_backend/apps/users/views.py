@@ -202,7 +202,7 @@ class ModifyUserSubject(APIView):
             ))
         return Response(response_json(
             success=True,
-            message='subject list update successfully'
+            message='subject list update successfully!'
         ))
 
 
