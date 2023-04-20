@@ -44,10 +44,6 @@ class CreateUserBatch(APIView):
     def post(self, request, action_user: User = None):
         # print('user_id is:' + str(user_id))
         # preprocess list
-        print(4)
-        print(request.data)
-        s = ""
-        s += str(request.data)
         name_list = request.data['name_list']
         student_id_list = request.data['student_id_list']
         password_list = request.data['password_list']
@@ -61,23 +57,17 @@ class CreateUserBatch(APIView):
         # iterate
         for name, student_id, password, role in zip(name_list, student_id_list, password_list, role_list):
             # create user
-            print(3)
-            print(name, student_id, password, role)
             try:
                 if User.objects.filter(student_id=student_id).exists():
-                    print(1)
                     user = User.objects.get(student_id=student_id)
-                    print(user.values())
                     user.name, user.password_digest, user.user_role = name, encode_password(password), role
                     user.mail = user.mail if user.mail else f"{student_id}@buaa.edu.cn"
                 else:
-                    print(2)
-                    print(student_id, name, encode_password(password), role, f"{student_id}@buaa.edu.cn")
                     user = User(student_id=student_id, name=name, password_digest=encode_password(password),
                                 user_role=role, mail=f"{student_id}@buaa.edu.cn")
-                    print(user.values())
                 user.save()
             except Exception as _e:
+                raise _e
                 return Response(response_json(
                     success=False,
                     code=UserErrorCode.USER_SAVE_FAILED,
