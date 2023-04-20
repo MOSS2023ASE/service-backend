@@ -55,7 +55,8 @@ class UploadImage(APIView):
         print(image_root)
         print(image_name)
         # get file
-        if image_type != image.name.split('.')[-1]:
+        img_suffix = image.name.split('.')[-1]
+        if image_type != ('jpeg' if img_suffix == 'jpg' else img_suffix):
             return Response(response_json(
                 success=False,
                 code=ImageErrorCode.UNEXPECTED_IMAGE_NAME,
