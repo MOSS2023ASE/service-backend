@@ -12,6 +12,8 @@ class IssueSerializer(serializers.ModelSerializer):
     subject_id = serializers.SerializerMethodField()
     subject_name = serializers.SerializerMethodField()
     tag_list = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField()
+    updated_at = serializers.SerializerMethodField()
 
     def get_issue_id(self, obj):
         return obj.id
@@ -46,6 +48,12 @@ class IssueSerializer(serializers.ModelSerializer):
     def get_subject_name(self, obj):
         return obj.chapter.subject.name
 
+    def get_created_at(self, obj):
+        return obj.created_at.strftime('%Y-%m-%d %H:%M:%S')
+
+    def get_updated_at(self, obj):
+        return obj.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+
     def get_tag_list(self, obj):
         issue_tags = obj.issue_tags.all()
         tags_content = [issue_tag.tag.content for issue_tag in issue_tags]
@@ -69,6 +77,8 @@ class IssueSearchSerializer(serializers.ModelSerializer):
     issue_title = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
     follow_count = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField()
+    updated_at = serializers.SerializerMethodField()
 
     def get_issue_id(self, obj):
         return obj.id
@@ -118,6 +128,12 @@ class IssueSearchSerializer(serializers.ModelSerializer):
     def get_follow_count(self, obj):
         return obj.follows
 
+    def get_created_at(self, obj):
+        return obj.created_at.strftime('%Y-%m-%d %H:%M:%S')
+
+    def get_updated_at(self, obj):
+        return obj.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+
     class Meta:
         model = Issue
         fields = ['issue_id', 'issue_title', 'content', 'user_id', 'user_name', 'user_avatar', 'chapter_id',
@@ -137,7 +153,7 @@ class CommentSerializer(serializers.ModelSerializer):
         return obj.id
 
     def get_time(self, obj):
-        return obj.updated_at
+        return obj.updated_at.strftime('%Y-%m-%d %H:%M:%S')
 
     def get_user_id(self, obj):
         if obj.issue.user_id == obj.user_id and \
