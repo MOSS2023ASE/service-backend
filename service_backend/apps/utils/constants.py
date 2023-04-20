@@ -10,6 +10,8 @@ class UserRole:
     TUTOR = 1
     ADMIN = 2
 
+DEFAULT_AVATAR = "http://shieask.com/pic/default_avatar.png"
+
 
 # 问题状态，0：未认领(默认)，1：已认领，2：未认领复审 3: 已认领复审 4: 有效提问 5: 无效提问
 class IssueStatus:
