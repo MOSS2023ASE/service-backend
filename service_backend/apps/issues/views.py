@@ -340,6 +340,16 @@ class IssueReadopt(APIView):
         issue.counselor = action_user
         issue.counsel_at = datetime.datetime.now()
 
+        adopt_issue = AdoptIssues(issue=issue, user=action_user, status=0)
+        try:
+            adopt_issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueReviewerErrorCode.REVIEWER_ISSUE_SAVED_FAILED,
+                message="can't readopt issue!"
+            ), status=404)
+
         reviewer_issue = ReviewIssues(issue=issue, user=action_user, reviewer=issue.counselor, status=1)
         try:
             reviewer_issue.save()
@@ -432,7 +442,7 @@ class IssueFollowCheck(APIView):
             return Response(response_json(
                 success=True,
                 data={
-                    "is_follow": 1,
+                    "is_follow": 0,
                     "follow_count": issue.follows
                 }
             ))
@@ -440,7 +450,7 @@ class IssueFollowCheck(APIView):
             return Response(response_json(
                 success=True,
                 data={
-                    "is_follow": 0,
+                    "is_follow": 1,
                     "follow_count": issue.follows
                 }
             ))
@@ -466,7 +476,7 @@ class IssueFollow(APIView):
             return Response(response_json(
                 success=True,
                 data={
-                    "is_follow": 0,
+                    "is_follow": 1,
                     "follow_count": issue.follows
                 }
             ))
@@ -484,7 +494,7 @@ class IssueFollow(APIView):
             return Response(response_json(
                 success=True,
                 data={
-                    "is_follow": 1,
+                    "is_follow": 0,
                     "follow_count": issue.follows
                 }
             ))
