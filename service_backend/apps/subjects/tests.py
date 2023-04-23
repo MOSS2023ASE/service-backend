@@ -7,11 +7,11 @@ from service_backend.apps.years.models import Year
 # Create your tests here.
 class SubjectAPITestCase(APITestCase):
     def setUp(self):
-        year = Year(content="year")
+        year = Year(id=1, content="year")
         year.save()
-        subject = Subject(name='subject_1', content='content_1', year=year)
+        subject = Subject(id=1, name='subject_1', content='content_1', year=year)
         subject.save()
-        subject = Subject(name='subject_2', content='content_2', year=year)
+        subject = Subject(id=2, name='subject_2', content='content_2', year=year)
         subject.save()
         return
 

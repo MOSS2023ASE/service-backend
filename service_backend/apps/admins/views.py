@@ -13,7 +13,7 @@ class CreateUser(APIView):
     @check_role(UserRole.ADMIN_ONLY)
     def post(self, request, action_user: User = None):
         # create user
-        print(request.data)
+        # print(request.data)
         student_id, name, password, role = request.data['student_id'], request.data['name'], request.data[
                 'password'], request.data['role']
         try:    
@@ -35,7 +35,7 @@ class CreateUser(APIView):
         # success
         return Response(response_json(
             success=True,
-            message="create user success!"
+            message="create user successfully!"
         ))
 
 
@@ -78,7 +78,7 @@ class CreateUserBatch(APIView):
         # success
         return Response(response_json(
             success=True,
-            message="batch create user success!"
+            message="batch create user successfully!"
         ))
 
 
@@ -90,6 +90,7 @@ class UserList(APIView):
         # user_serializar = UserSerializer(user, many=True)
         return Response(response_json(
             success=True,
+            message="get user list successfully!",
             data={
                 'user_list': [
                     {
@@ -130,7 +131,7 @@ class UpdateUserRole(APIView):
             ))
         return Response(response_json(
             success=True,
-            message="update user role success!"
+            message="update user role successfully!"
         ))
 
 
@@ -159,7 +160,7 @@ class FreezeUser(APIView):
             ))
         return Response(response_json(
             success=True,
-            message="update frozen status success!"
+            message="update frozen status successfully!"
         ))
 
 
@@ -185,5 +186,5 @@ class DeleteIssue(APIView):
             ))
         return Response(response_json(
             success=True,
-            message="delete issue success!"
+            message="delete issue successfully!"
         ))

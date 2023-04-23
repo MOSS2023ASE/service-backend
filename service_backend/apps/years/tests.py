@@ -5,9 +5,9 @@ from rest_framework.test import APITestCase
 # Create your tests here.
 class YearAPITestCase(APITestCase):
     def setUp(self):
-        year = Year(content='test1')
+        year = Year(id=1, content='test1')
         year.save()
-        year = Year(content='test2')
+        year = Year(id=2, content='test2')
         year.save()
 
     def test_list(self):
