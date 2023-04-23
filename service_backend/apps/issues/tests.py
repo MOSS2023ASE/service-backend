@@ -36,33 +36,38 @@ class IssueAPITestCase(APITestCase):
         return response.data['data']['jwt']
 
     def setUp(self):
-        user = User(id=1, student_id='20373743', name='ccy', password_digest=encode_password('123456'), user_role=2, frozen=0)
+        user = User(student_id='20373743', name='ccy', password_digest=encode_password('123456'), user_role=2, frozen=0)
         user.save()
-        user = User(id=2, student_id='20373044', name='xyy', password_digest=encode_password('123456'), user_role=1, frozen=0)
+        user = User(student_id='20373044', name='xyy', password_digest=encode_password('123456'), user_role=1, frozen=0)
         user.save()
-        user = User(id=3, student_id='20373290', name='aaa', password_digest=encode_password('123456'), user_role=1, frozen=0)
+        user = User(student_id='20373290', name='aaa', password_digest=encode_password('123456'), user_role=1, frozen=0)
         user.save()
-        user = User(id=4, student_id='20373228', name='bbb', password_digest=encode_password('123456'), user_role=0, frozen=0)
+        user = User(student_id='20373228', name='bbb', password_digest=encode_password('123456'), user_role=0, frozen=0)
         user.save()
-        user = User(id=5, student_id='20373043', name='lsz', password_digest=encode_password('123456'), user_role=0, frozen=0)
+        user = User(student_id='20373043', name='lsz', password_digest=encode_password('123456'), user_role=0, frozen=0)
         user.save()
-        year = Year(id=1, content="year")
+        year = Year(content="year")
         year.save()
-        subject = Subject(id=1, name='subject', content='content', year=year)
+        subject = Subject(name='subject', content='content', year=year)
         subject.save()
-        chapter = Chapter(id=1, name='chapter_1', content='content_1', subject=subject)
+        chapter = Chapter(name='chapter_1', content='content_1', subject=subject)
         chapter.save()
-        chapter = Chapter(id=2, name='chapter_2', content='content_2', subject=subject)
+        self.chapter = chapter
+        chapter = Chapter(name='chapter_2', content='content_2', subject=subject)
         chapter.save()
-        issue = Issue(id=1, title='issue', user=user, chapter_id=1, status=IssueStatus.NOT_ADOPT, anonymous=0)
+        issue = Issue(title='issue', user=user, chapter=self.chapter, status=IssueStatus.NOT_ADOPT, anonymous=0)
         issue.save()
-        tag = Tag(id=1, content="tag_1")
+        self.issue = issue
+        tag = Tag(content="tag_1")
         tag.save()
-        tag = Tag(id=2, content="tag_2")
+        self.tag_1 = tag
+        tag = Tag(content="tag_2")
         tag.save()
-        comment = Comment(id=1, content="comment_1", issue=issue, user_id=1)
+        self.tag_2 = tag
+        comment = Comment(content="comment_1", issue=issue, user=user)
         comment.save()
-        comment = Comment(id=2, content="comment_2", issue=issue, user=user)
+        self.comment = comment
+        comment = Comment(content="comment_2", issue=issue, user=user)
         comment.save()
         return
 
@@ -71,7 +76,7 @@ class IssueAPITestCase(APITestCase):
         url = '/issue/get'
         data = {
             "jwt": jwt,
-            "issue_id": 1
+            "issue_id": self.issue.id
         }
         response = self.client.post(url, data)
         self.assertEqual(response.data['code'], 0)
@@ -82,7 +87,7 @@ class IssueAPITestCase(APITestCase):
         url = '/issue/cancel'
         data = {
             "jwt": jwt,
-            "issue_id": 1
+            "issue_id": self.issue.id
         }
         response = self.client.post(url, data)
         self.assertEqual(response.data['code'], 0)
@@ -100,15 +105,15 @@ class IssueAPITestCase(APITestCase):
         classify_url = '/issue/classify'
         student_data = {
             "jwt": jwt_student,
-            "issue_id": 1
+            "issue_id": self.issue.id
         }
         tutor_data_1 = {
             "jwt": jwt_tutor_1,
-            "issue_id": 1
+            "issue_id": self.issue.id
         }
         tutor_data_2 = {
             "jwt": jwt_tutor_2,
-            "issue_id": 1
+            "issue_id": self.issue.id
         }
         response = self.client.post(adopt_url, tutor_data_1)
         self.assertEqual(response.data['code'], 0)
@@ -136,7 +141,7 @@ class IssueAPITestCase(APITestCase):
         url = '/issue/commit'
         data = {
             "jwt": jwt,
-            "chapter_id": 1,
+            "chapter_id": self.chapter.id,
             "title": "issue_title",
             "content": "issue_content",
             "anonymous": 0
@@ -151,13 +156,13 @@ class IssueAPITestCase(APITestCase):
         follow_check_url = '/issue/follow_check'
         data = {
             "jwt": jwt,
-            "issue_id": 1
+            "issue_id": self.issue.id
         }
         response = self.client.post(follow_url, data)
         self.assertEqual(response.data['code'], 0)
         response = self.client.post(follow_check_url, data)
         self.assertEqual(response.data['code'], 0)
-        self.assertEqual(response.data['data']['is_follow'], 0)
+        self.assertEqual(response.data['data']['is_follow'], 1)
         return
 
     def test_favorite(self):
@@ -166,7 +171,7 @@ class IssueAPITestCase(APITestCase):
         like_url = '/issue/like'
         data = {
             "jwt": jwt,
-            "issue_id": 1
+            "issue_id": self.issue.id
         }
         response = self.client.post(favorite_url, data)
         self.assertEqual(response.data['code'], 0)
@@ -184,15 +189,15 @@ class IssueAPITestCase(APITestCase):
         url = '/issue/update'
         data = {
             "jwt": jwt,
-            "issue_id": 1,
-            "chapter_id": 1,
+            "issue_id": self.issue.id,
+            "chapter_id": self.chapter.id,
             "title": "test_update",
             "content": "测试更新content",
             "anonymous": 1
         }
         response = self.client.post(url, data)
         self.assertEqual(response.data['code'], 0)
-        response = self.client.post('/issue/get', {"jwt": jwt, "issue_id": 1})
+        response = self.client.post('/issue/get', {"jwt": jwt, "issue_id": self.issue.id})
         self.assertEqual(response.data['code'], 0)
         return
 
@@ -204,7 +209,7 @@ class IssueAPITestCase(APITestCase):
             "keyword": "",
             "tag_list": [],
             "status_list": [],
-            "chapter_list": [1],
+            "chapter_list": [self.chapter.id],
             "order": "",
             "page_no": 1,
             "issue_per_page": 100
@@ -218,7 +223,7 @@ class IssueAPITestCase(APITestCase):
         url = '/issue/tags'
         data = {
             "jwt": jwt,
-            "issue_id": 1
+            "issue_id": self.issue.id
         }
         response = self.client.post(url, data)
         self.assertEqual(response.data['code'], 0)
@@ -229,12 +234,12 @@ class IssueAPITestCase(APITestCase):
         url = '/issue/tags_update'
         data = {
             "jwt": jwt,
-            "issue_id": 1,
-            "tag_list": [1, 2]
+            "issue_id": self.issue.id,
+            "tag_list": [self.tag_1.id, self.tag_2.id]
         }
         response = self.client.post(url, data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.data['code'], 0)
-        response = self.client.post('/issue/tags', {"jwt": jwt, "issue_id": 1})
+        response = self.client.post('/issue/tags', {"jwt": jwt, "issue_id": self.issue.id})
         self.assertEqual(response.data['code'], 0)
         return
 
@@ -243,7 +248,7 @@ class IssueAPITestCase(APITestCase):
         url = '/issue/comments'
         data = {
             "jwt": jwt,
-            "issue_id": 1
+            "issue_id": self.issue.id
         }
         response = self.client.post(url, data)
         self.assertEqual(response.data['code'], 0)
@@ -254,7 +259,7 @@ class IssueAPITestCase(APITestCase):
         url = '/issue/comment/create'
         data = {
             "jwt": jwt,
-            "issue_id": 1,
+            "issue_id": self.issue.id,
             "content": "content_create"
         }
         response = self.client.post(url, data)
@@ -266,7 +271,7 @@ class IssueAPITestCase(APITestCase):
         url = '/issue/comment/update'
         data = {
             "jwt": jwt,
-            "comment_id": 1,
+            "comment_id": self.comment.id,
             "content": "content_update"
         }
         response = self.client.post(url, data)
@@ -278,7 +283,7 @@ class IssueAPITestCase(APITestCase):
         url = '/issue/comment'
         data = {
             "jwt": jwt,
-            "comment_id": 1,
+            "comment_id": self.comment.id,
         }
         response = self.client.delete(url, data)
         self.assertEqual(response.data['code'], 0)
