@@ -3,6 +3,7 @@ import json
 from rest_framework.test import APITestCase
 
 from service_backend.apps.chapters.models import Chapter
+from service_backend.apps.chapters.serializers import ChapterSerializer
 from service_backend.apps.issues.models import Issue, Comment
 from service_backend.apps.subjects.models import Subject
 from service_backend.apps.tags.models import Tag
@@ -53,6 +54,9 @@ class IssueAPITestCase(APITestCase):
         chapter.save()
         chapter = Chapter(name='chapter_2', content='content_2', subject=subject)
         chapter.save()
+        chapters = Chapter.objects.all()
+        chapters_s = ChapterSerializer(chapters, many=True)
+        print(chapters_s.data)
         issue = Issue(title='issue', user=user, chapter_id=1, status=IssueStatus.NOT_ADOPT, anonymous=0)
         issue.save()
         tag = Tag(content="tag_1")

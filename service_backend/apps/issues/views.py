@@ -135,15 +135,16 @@ class IssueReview(APIView):
                 code=IssueErrorCode.ISSUE_SAVED_FAILED,
                 message="can't review issue!"
             ), status=404)
-        # reviewer_issue = ReviewIssues(issue=issue, user=action_user, reviewer=issue.counselor, status=0)
-        # try:
-        #     reviewer_issue.save()
-        # except Exception as e:
-        #     return Response(response_json(
-        #         success=False,
-        #         code=IssueReviewerErrorCode.REVIEWER_ISSUE_SAVED_FAILED,
-        #         message="can't review issue!"
-        #     ), status=404)
+
+        reviewer_issue = ReviewIssues(issue=issue, user=action_user, reviewed=issue.counselor)
+        try:
+            reviewer_issue.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=IssueReviewerErrorCode.REVIEWER_ISSUE_SAVED_FAILED,
+                message="can't review issue!"
+            ), status=404)
 
         return Response(response_json(
             success=True,
@@ -290,16 +291,6 @@ class IssueClassify(APIView):
                 message="you have no access to this issue!"
             ), status=404)
 
-        reviewer_issue = ReviewIssues(issue=issue, user=action_user, reviewer=issue.counselor, status=0)
-        try:
-            reviewer_issue.save()
-        except Exception as e:
-            return Response(response_json(
-                success=False,
-                code=IssueReviewerErrorCode.REVIEWER_ISSUE_SAVED_FAILED,
-                message="can't review issue!"
-            ), status=404)
-
         if request.data['is_valid'] == 1:
             issue.status = IssueStatus.VALID_ISSUE
         elif request.data['is_valid'] == 0:
@@ -310,6 +301,8 @@ class IssueClassify(APIView):
                 code=OtherErrorCode.UNEXPECTED_JSON_FORMAT,
                 message="is_valid is not valid!"
             ), status=404)
+        reviewer_issue = ReviewIssues.objects.filter(issue=issue, user=action_user)
+        reviewer_issue.first().status = 1
         try:
             issue.save()
         except Exception as e:
@@ -350,15 +343,8 @@ class IssueReadopt(APIView):
                 message="can't readopt issue!"
             ), status=404)
 
-        reviewer_issue = ReviewIssues(issue=issue, user=action_user, reviewer=issue.counselor, status=1)
-        try:
-            reviewer_issue.save()
-        except Exception as e:
-            return Response(response_json(
-                success=False,
-                code=IssueReviewerErrorCode.REVIEWER_ISSUE_SAVED_FAILED,
-                message="can't review issue!"
-            ), status=404)
+        reviewer_issue = ReviewIssues.objects.filter(issue=issue, user=action_user)
+        reviewer_issue.first().status = 0
 
         try:
             issue.save()
