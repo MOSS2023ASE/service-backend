@@ -62,8 +62,8 @@ class AdoptIssues(MyModel):
 class ReviewIssues(MyModel):
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='review_issues')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_review_issues')
-    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviewer_review_issues')
-    status = models.IntegerField()
+    reviewed = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviewer_review_issues')
+    status = models.IntegerField(null=True)
 
     class Meta:
         db_table = 'review_issues'

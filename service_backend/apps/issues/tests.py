@@ -3,6 +3,7 @@ import json
 from rest_framework.test import APITestCase
 
 from service_backend.apps.chapters.models import Chapter
+from service_backend.apps.chapters.serializers import ChapterSerializer
 from service_backend.apps.issues.models import Issue, Comment
 from service_backend.apps.subjects.models import Subject
 from service_backend.apps.tags.models import Tag
