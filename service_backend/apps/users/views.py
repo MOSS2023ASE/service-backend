@@ -119,7 +119,8 @@ class GetUserInfo(APIView):
                 'student_id': action_user.student_id,
                 'name': action_user.name,
                 'mail': action_user.mail,
-                'avatar': action_user.avatar
+                'avatar': action_user.avatar,
+                'role': action_user.user_role
             }
         ))
 
