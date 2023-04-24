@@ -237,8 +237,7 @@ class GetReviewIssue(APIView):
         page_no, issue_per_page = request.data['page_no'], request.data['issue_per_page']
         try:
             issue_list = Issue.objects.filter(review_issues__reviewed=action_user.id).order_by(
-                '-updated_at')
-            print(issue_list).distinct()
+                '-updated_at').distinct()
         except Exception as _e:
             return Response(response_json(
                 success=False,
