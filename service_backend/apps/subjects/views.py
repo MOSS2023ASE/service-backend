@@ -2,6 +2,7 @@ from functools import wraps
 from rest_framework.response import Response
 
 from service_backend.apps.subjects.models import Subject
+from service_backend.apps.chapters.models import Chapter
 from rest_framework.views import APIView
 
 from service_backend.apps.utils.constants import SubjectErrorCode, YearErrorCode
@@ -70,7 +71,15 @@ class SubjectCreate(APIView):
                 code=SubjectErrorCode.SUBJECT_SAVE_FAILED,
                 message="can't save subject!"
             ), status=404)
-
+        chapter = Chapter(name='未分类', content='该目录下存放未分类章节的问题。', subject=subject)
+        try:
+            chapter.save()
+        except Exception as e:
+            return Response(response_json(
+                success=False,
+                code=ChapterErrorCode.CHAPTER_SAVE_FAILED,
+                message="can't save chapter!"
+            ), status=404)
         return Response(response_json(
             success=True,
             message="create subject success!"
