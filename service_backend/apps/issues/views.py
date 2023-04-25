@@ -2,6 +2,7 @@ import datetime
 import math
 from functools import wraps
 
+from django.db.models import F
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -632,6 +633,8 @@ class IssueSearch(APIView):
             issues = issues.order_by('-created_at')
         elif order == 1:
             issues = issues.order_by('created_at')
+        elif order == 2:
+            issues = issues.annotate(score=F('likes') + 5 * F('follows')).order_by('-score')
         else:
             pass
 
