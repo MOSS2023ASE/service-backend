@@ -40,7 +40,10 @@ def status_trans_permit(issue, action_user):
     if issue.status == IssueStatus.NOT_ADOPT and \
             action_user.user_role == UserRole.TUTOR and \
             UserSubject.objects.filter(user=action_user, subject=issue.chapter.subject):
-        status[0] = 1
+        adopt_issues = AdoptIssues.objects.filter(issue=issue).all()
+        adopted = [adopt_issue.user for adopt_issue in adopt_issues]
+        if action_user not in adopted:
+            status[0] = 1
     if issue.status == IssueStatus.NOT_ADOPT and \
             action_user.user_role == UserRole.STUDENT and \
             issue.user == action_user:
