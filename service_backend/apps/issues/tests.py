@@ -119,7 +119,7 @@ class IssueAPITestCase(APITestCase):
         self.assertEqual(response.data['code'], 0)
         response = self.client.post(reject_url, student_data)
         self.assertEqual(response.data['code'], 0)
-        response = self.client.post(adopt_url, tutor_data_2)
+        response = self.client.post(adopt_url, tutor_data_1)
         self.assertEqual(response.data['code'], 0)
         response = self.client.post(agree_url, student_data)
         self.assertEqual(response.data['code'], 0)
@@ -210,7 +210,7 @@ class IssueAPITestCase(APITestCase):
             "tag_list": [],
             "status_list": [],
             "chapter_list": [self.chapter.id],
-            "order": "",
+            "order": 3,
             "page_no": 1,
             "issue_per_page": 100
         }
