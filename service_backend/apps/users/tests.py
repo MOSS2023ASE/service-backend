@@ -175,7 +175,7 @@ class UserAPITestCase(APITestCase):
         url = '/user/modify_user_info'
         data = {
             "jwt": jwt_token,
-            "avatar": "http://shieask.com/pic/20373743_20230419102933_f1c88caf-80a9-4d05-b8f2-a3d41f8fea1d.png",
+            "avatar": "https://shieask.com/pic/20373743_20230419102933_f1c88caf-80a9-4d05-b8f2-a3d41f8fea1d.png",
             "mail": "20373743@buaa.edu.cn"
         }
         response = self.client.post(url, data=json.dumps(data), content_type='application/json')
@@ -196,7 +196,7 @@ class UserAPITestCase(APITestCase):
         self.assertEqual(response.data['data']['name'], "ccy")
         self.assertEqual(response.data['data']['mail'], "20373743@buaa.edu.cn")
         self.assertEqual(response.data['data']['avatar'],
-                         "http://shieask.com/pic/20373743_20230419102933_f1c88caf-80a9-4d05-b8f2-a3d41f8fea1d.png")
+                         "https://shieask.com/pic/20373743_20230419102933_f1c88caf-80a9-4d05-b8f2-a3d41f8fea1d.png")
         return
 
     def test_user_subject(self):
