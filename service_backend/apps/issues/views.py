@@ -637,7 +637,7 @@ class IssueSearch(APIView):
         elif order == 1:
             issues = issues.order_by('created_at')
         elif order == 2:
-            issues = issues.annotate(score=F('likes') + 5 * F('follows')).order_by('-score')
+            issues = issues.annotate(heat=F('likes') + 5 * F('follows')).order_by('-heat')
         else:
             pass
 
