@@ -10,7 +10,7 @@ import uuid
 import imghdr
 from datetime import datetime
 
-PIC_URL_BASE = "http://shieask.com/pic/"
+PIC_URL_BASE = "https://shieask.com/pic/"
 # PIC_URL_BASE = 'http://localhost:8000'
 
 
