@@ -14,6 +14,7 @@ from service_backend.apps.utils.constants import UserRole, IssueStatus, IssueErr
     IssueLikeErrorCode, IssueFollowErrorCode, IssueTagErrorCode, IssueReviewerErrorCode, OtherErrorCode
 from service_backend.apps.utils.views import response_json, check_role
 from service_backend.apps.issues.serializers import IssueSerializer, CommentSerializer, IssueSearchSerializer
+from service_backend.apps.utils.filter import Filter
 
 
 def _find_issue():
