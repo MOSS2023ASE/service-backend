@@ -22,12 +22,12 @@ class Issue(MyModel):
     likes = models.IntegerField(default=0)
     follows = models.IntegerField(default=0)
 
-    def save(self, *args, **kwargs):
-        # filter
-        flt = Filter()
-        self.title = flt.filter(self.title)
-        self.content = flt.filter(self.content)
-        return super().save(self, *args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # filter
+    #     # flt = Filter()
+    #     # self.title = flt.filter(self.title)
+    #     # self.content = flt.filter(self.content)
+    #     return super().save(self, *args, **kwargs)
 
     class Meta:
         db_table = 'issues'
@@ -38,11 +38,11 @@ class Comment(MyModel):
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
 
-    def save(self, *args, **kwargs):
-        # filter
-        flt = Filter()
-        self.content = flt.filter(self.content)
-        return super().save(self, *args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # filter
+    #     # flt = Filter()
+    #     # self.content = flt.filter(self.content)
+    #     return super().save(self, *args, **kwargs)
 
     class Meta:
         db_table = 'comments'
