@@ -24,9 +24,9 @@ class Issue(MyModel):
 
     def save(self, *args, **kwargs):
         # filter
-        flt = Filter()
-        self.title = flt.filter(self.title)
-        self.content = flt.filter(self.content)
+        # flt = Filter()
+        # self.title = flt.filter(self.title)
+        # self.content = flt.filter(self.content)
         return super().save(self, *args, **kwargs)
 
     class Meta:
@@ -40,8 +40,8 @@ class Comment(MyModel):
 
     def save(self, *args, **kwargs):
         # filter
-        flt = Filter()
-        self.content = flt.filter(self.content)
+        # flt = Filter()
+        # self.content = flt.filter(self.content)
         return super().save(self, *args, **kwargs)
 
     class Meta:
