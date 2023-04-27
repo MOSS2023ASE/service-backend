@@ -143,7 +143,7 @@ class IssueAPITestCase(APITestCase):
             "jwt": jwt,
             "chapter_id": self.chapter.id,
             "title": "issue_title",
-            "content": "issue_content",
+            "content": "issue_sexy",
             "anonymous": 0
         }
         response = self.client.post(url, data)
@@ -272,7 +272,7 @@ class IssueAPITestCase(APITestCase):
         data = {
             "jwt": jwt,
             "comment_id": self.comment.id,
-            "content": "content_update"
+            "content": "content_sexy"
         }
         response = self.client.post(url, data)
         self.assertEqual(response.data['code'], 0)

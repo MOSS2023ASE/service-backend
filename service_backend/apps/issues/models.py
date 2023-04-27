@@ -1,5 +1,6 @@
 from django.db import models
 
+from service_backend.apps.utils.filter import Filter
 from service_backend.apps.utils.models import MyModel
 from service_backend.apps.users.models import User
 from service_backend.apps.chapters.models import Chapter
@@ -21,6 +22,13 @@ class Issue(MyModel):
     likes = models.IntegerField(default=0)
     follows = models.IntegerField(default=0)
 
+    def save(self, *args, **kwargs):
+        # filter
+        flt = Filter()
+        self.title = flt.filter(self.title)
+        self.content = flt.filter(self.content)
+        return super().save(self, *args, **kwargs)
+
     class Meta:
         db_table = 'issues'
 
@@ -29,6 +37,12 @@ class Comment(MyModel):
     content = models.CharField(max_length=3071)
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+
+    def save(self, *args, **kwargs):
+        # filter
+        flt = Filter()
+        self.content = flt.filter(self.content)
+        return super().save(self, *args, **kwargs)
 
     class Meta:
         db_table = 'comments'
