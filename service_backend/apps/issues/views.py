@@ -557,9 +557,16 @@ class IssueLike(APIView):
 
 
 class IssueUpdate(APIView):
+    @check_role([UserRole.STUDENT, ])
     @_find_chapter()
     @_find_issue()
-    def post(self, request, issue, chapter):
+    def post(self, request, issue, chapter, action_user):
+        if issue.status != IssueStatus.NOT_ADOPT or action_user != issue.user:
+            return Response(response_json(
+                success=False,
+                code=IssueErrorCode.ISSUE_ACTION_REJECT,
+                message="you have no access to this issue update!"
+            ), status=404)
         issue.title = request.data['title']
         issue.content = request.data['content']
         issue.anonymous = request.data['anonymous']
