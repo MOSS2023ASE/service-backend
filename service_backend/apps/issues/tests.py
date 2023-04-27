@@ -119,7 +119,7 @@ class IssueAPITestCase(APITestCase):
         self.assertEqual(response.data['code'], 0)
         response = self.client.post(reject_url, student_data)
         self.assertEqual(response.data['code'], 0)
-        response = self.client.post(adopt_url, tutor_data_1)
+        response = self.client.post(adopt_url, tutor_data_2)
         self.assertEqual(response.data['code'], 0)
         response = self.client.post(agree_url, student_data)
         self.assertEqual(response.data['code'], 0)
