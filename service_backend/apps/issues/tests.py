@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 from service_backend.apps.chapters.models import Chapter
 from service_backend.apps.chapters.serializers import ChapterSerializer
 from service_backend.apps.issues.models import Issue, Comment
-from service_backend.apps.subjects.models import Subject
+from service_backend.apps.subjects.models import Subject, UserSubject
 from service_backend.apps.tags.models import Tag
 from service_backend.apps.users.models import User
 from service_backend.apps.utils.constants import IssueStatus
@@ -46,24 +46,35 @@ class IssueAPITestCase(APITestCase):
         user.save()
         user = User(student_id='20373043', name='lsz', password_digest=encode_password('123456'), user_role=0, frozen=0)
         user.save()
+
         year = Year(content="year")
         year.save()
+
         subject = Subject(name='subject', content='content', year=year)
         subject.save()
+
+        user_subject = UserSubject(user=User.objects.get(student_id='20373044'), subject=subject)
+        user_subject.save()
+        user_subject = UserSubject(user=User.objects.get(student_id='20373290'), subject=subject)
+        user_subject.save()
+
         chapter = Chapter(name='chapter_1', content='content_1', subject=subject)
         chapter.save()
         self.chapter = chapter
         chapter = Chapter(name='chapter_2', content='content_2', subject=subject)
         chapter.save()
+
         issue = Issue(title='issue', user=user, chapter=self.chapter, status=IssueStatus.NOT_ADOPT, anonymous=0)
         issue.save()
         self.issue = issue
+
         tag = Tag(content="tag_1")
         tag.save()
         self.tag_1 = tag
         tag = Tag(content="tag_2")
         tag.save()
         self.tag_2 = tag
+
         comment = Comment(content="comment_1", issue=issue, user=user)
         comment.save()
         self.comment = comment

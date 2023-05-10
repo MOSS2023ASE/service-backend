@@ -15,7 +15,7 @@ def _find_year():
         def wrapper(*args, **kwargs):
             try:
                 year = Year.objects.get(id=args[1].data['year_id'])
-            except Exception as e:
+            except Exception:
                 return Response(response_json(
                     success=False,
                     code=YearErrorCode.YEAR_DOES_NOT_EXIST,
@@ -44,7 +44,7 @@ class YearCreate(APIView):
         year = Year(content=request.data['content'])
         try:
             year.save()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=YearErrorCode.YEAR_SAVE_FAILED,
@@ -63,7 +63,7 @@ class YearUpdate(APIView):
         year.content = request.data['content']
         try:
             year.save()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=YearErrorCode.YEAR_SAVE_FAILED,
