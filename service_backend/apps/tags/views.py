@@ -16,7 +16,7 @@ def _find_tag():
         def wrapper(*args, **kwargs):
             try:
                 tag = Tag.objects.get(id=args[1].data['tag_id'])
-            except Exception as e:
+            except Exception:
                 return Response(response_json(
                     success=False,
                     code=TagErrorCode.TAG_DOES_NOT_EXIST,
@@ -46,7 +46,7 @@ class TagCreate(APIView):
         tag = Tag(content=content)
         try:
             tag.save()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=TagErrorCode.TAG_SAVE_FAILED,
@@ -65,7 +65,7 @@ class TagUpdate(APIView):
         tag.content = request.data['content']
         try:
             tag.save()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=TagErrorCode.TAG_SAVE_FAILED,
@@ -83,7 +83,7 @@ class TagDelete(APIView):
     def delete(self, request, tag):
         try:
             tag.delete()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=TagErrorCode.TAG_DELETE_FAILED,
