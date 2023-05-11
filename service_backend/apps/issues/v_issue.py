@@ -357,7 +357,7 @@ class IssueUpdate(APIView):
             return Response(response_json(
                 success=False,
                 code=IssueErrorCode.ISSUE_SAVED_FAILED,
-                message="can't save issue!"
+                message="can't save issue! probably have sensitive word!"
             ), status=404)
         return Response(response_json(
             success=True
@@ -380,7 +380,7 @@ class IssueCommit(APIView):
             return Response(response_json(
                 success=False,
                 code=IssueErrorCode.ISSUE_SAVED_FAILED,
-                message="can't save issue!"
+                message="can't save issue! probably have sensitive word!"
             ), status=404)
 
         return Response(response_json(
