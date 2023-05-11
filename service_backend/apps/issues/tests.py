@@ -3,7 +3,6 @@ import json
 from rest_framework.test import APITestCase
 
 from service_backend.apps.chapters.models import Chapter
-from service_backend.apps.chapters.serializers import ChapterSerializer
 from service_backend.apps.issues.models import Issue, Comment
 from service_backend.apps.subjects.models import Subject, UserSubject
 from service_backend.apps.tags.models import Tag
@@ -64,7 +63,7 @@ class IssueAPITestCase(APITestCase):
         chapter = Chapter(name='chapter_2', content='content_2', subject=subject)
         chapter.save()
 
-        issue = Issue(title='issue', user=user, chapter=self.chapter, status=IssueStatus.NOT_ADOPT, anonymous=0)
+        issue = Issue(title='问题测试', content="内容测试", user=user, chapter=self.chapter, status=IssueStatus.NOT_ADOPT, anonymous=0)
         issue.save()
         self.issue = issue
 
@@ -154,11 +153,11 @@ class IssueAPITestCase(APITestCase):
             "jwt": jwt,
             "chapter_id": self.chapter.id,
             "title": "issue_title",
-            "content": "issue_sexy",
+            "content": "习近平",
             "anonymous": 0
         }
         response = self.client.post(url, data)
-        self.assertEqual(response.data['code'], 0)
+        self.assertEqual(response.data['message'], "can't save issue! probably have sensitive word!")
         return
 
     def test_follow(self):

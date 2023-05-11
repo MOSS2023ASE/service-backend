@@ -25,8 +25,8 @@ class Issue(MyModel):
     def save(self, *args, **kwargs):
         # filter
         flt = Filter()
-        self.title = flt.filter(self.title)
-        self.content = flt.filter(self.content)
+        if flt.has_sensitive_word(self.title) or flt.has_sensitive_word(self.content):
+            raise Exception
         return super(Issue, self).save(*args, **kwargs)
 
     class Meta:
@@ -41,7 +41,8 @@ class Comment(MyModel):
     def save(self, *args, **kwargs):
         # filter
         flt = Filter()
-        self.content = flt.filter(self.content)
+        if flt.has_sensitive_word(self.content):
+            return False
         return super(Comment, self).save(*args, **kwargs)
 
     class Meta:

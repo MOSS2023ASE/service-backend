@@ -11,7 +11,13 @@ class Filter:
         for keyword in f:
             self.keywords.append(keyword.strip())
 
-    def filter(self, message, replace="*"):
+    def has_sensitive_word(self, message):
         for kw in self.keywords:
-            message = message.replace(kw, replace * len(kw))
-        return message
+            if kw in message:
+                return True
+        return False
+
+    # def filter(self, message, replace="*"):
+    #     for kw in self.keywords:
+    #         message = message.replace(kw, replace * len(kw))
+    #     return message

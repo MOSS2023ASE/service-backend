@@ -31,7 +31,7 @@ class CommentCreate(APIView):
             return Response(response_json(
                 success=False,
                 code=CommentErrorCode.COMMENT_SAVED_FAILED,
-                message="can't save comment!"
+                message="can't save comment! probably have sensitive word!"
             ), status=404)
 
         return Response(response_json(
@@ -51,7 +51,7 @@ class CommentUpdate(APIView):
             return Response(response_json(
                 success=False,
                 code=CommentErrorCode.COMMENT_SAVED_FAILED,
-                message="can't save comment!"
+                message="can't save comment! probably have sensitive word!"
             ), status=404)
 
         return Response(response_json(
