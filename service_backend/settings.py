@@ -87,7 +87,6 @@ WSGI_APPLICATION = 'service_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-print(ENV['USE_MYSQL'])
 if not ENV['USE_MYSQL']:
     DATABASES = {
         'default': {

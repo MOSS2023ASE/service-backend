@@ -15,3 +15,10 @@ class User(MyModel):
 
     class Meta:
         db_table = 'users'
+
+
+class BlackList(MyModel):
+    token = models.CharField(max_length=255, unique=True)
+
+    class Meta:
+        db_table = 'black_list'

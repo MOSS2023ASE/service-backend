@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from service_backend.apps.users.models import User
+from service_backend.apps.users.models import User, BlackList
 from service_backend.apps.subjects.models import UserSubject, Subject
 from service_backend.apps.issues.models import ReviewIssues, FollowIssues, LikeIssues, AdoptIssues, Issue
 from service_backend.apps.utils.views import response_json, encode_password, generate_jwt, check_role
@@ -76,6 +76,8 @@ class UserLogin(APIView):
 class UserLogout(APIView):
     @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
+        expired_token = BlackList(token=request.data['jwt'])
+        expired_token.save()
         return Response(response_json(
             success=True,
             message="user logout successfully!"
