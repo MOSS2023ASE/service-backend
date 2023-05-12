@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-import json, os
+import json
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -85,23 +86,25 @@ WSGI_APPLICATION = 'service_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-DATABASES = {
-    'default': {
-        'ENGINE': ENV['DATABASES']['ENGINE'],
-        'NAME': ENV['DATABASES']['NAME'],
-        'USER': ENV['DATABASES']['USER'],
-        'PASSWORD': ENV['DATABASES']['PASSWORD'],
-        'HOST': ENV['DATABASES']['HOST'],
-        'PORT': ENV['DATABASES']['PORT']
+print(ENV['USE_MYSQL'])
+if not ENV['USE_MYSQL']:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': ENV['DATABASES']['ENGINE'],
+            'NAME': ENV['DATABASES']['NAME'],
+            'USER': ENV['DATABASES']['USER'],
+            'PASSWORD': ENV['DATABASES']['PASSWORD'],
+            'HOST': ENV['DATABASES']['HOST'],
+            'PORT': ENV['DATABASES']['PORT']
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
