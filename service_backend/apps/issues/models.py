@@ -82,3 +82,14 @@ class ReviewIssues(MyModel):
 
     class Meta:
         db_table = 'review_issues'
+
+
+class UserDraft(MyModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_draft')
+    title = models.CharField(max_length=255, null=True)
+    content = models.CharField(max_length=3071, null=True)
+    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE, related_name='draft_chapter', null=True)
+    anonymous = models.IntegerField(null=True)
+
+    class Meta:
+        db_table = 'user_drafts'

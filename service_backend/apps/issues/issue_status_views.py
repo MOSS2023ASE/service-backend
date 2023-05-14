@@ -3,7 +3,7 @@ import datetime
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from service_backend.apps.issues.v_issue import find_issue, status_trans_permit
+from service_backend.apps.issues.issue_views import find_issue, status_trans_permit
 from service_backend.apps.issues.models import AdoptIssues, ReviewIssues
 from service_backend.apps.utils.constants import UserRole, IssueStatus, IssueErrorCode, IssueReviewerErrorCode, \
     OtherErrorCode

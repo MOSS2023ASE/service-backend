@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 from service_backend.apps.issues.models import Comment
 from service_backend.apps.utils.constants import UserRole, CommentErrorCode
 from service_backend.apps.utils.views import response_json, check_role
-from service_backend.apps.issues.serializers import CommentSerializer
-from service_backend.apps.issues.v_issue import find_issue, find_comment
+from service_backend.apps.issues.comment_serializer import CommentSerializer
+from service_backend.apps.issues.issue_views import find_issue, find_comment
 
 
 class CommentList(APIView):
