@@ -63,7 +63,8 @@ class IssueAPITestCase(APITestCase):
         chapter = Chapter(name='chapter_2', content='content_2', subject=subject)
         chapter.save()
 
-        issue = Issue(title='问题测试', content="内容测试", user=user, chapter=self.chapter, status=IssueStatus.NOT_ADOPT, anonymous=0)
+        issue = Issue(title='问题测试', content="内容测试", user=user, chapter=self.chapter,
+                      status=IssueStatus.NOT_ADOPT, anonymous=0)
         issue.save()
         self.issue = issue
 
@@ -298,3 +299,23 @@ class IssueAPITestCase(APITestCase):
         response = self.client.delete(url, data)
         self.assertEqual(response.data['code'], 0)
         return
+
+    def test_draft(self):
+        jwt = self._student_login()
+        url = '/issue/save_draft'
+        data = {
+            "jwt": jwt,
+            "chapter_id": self.chapter.id,
+            "title": None,
+            "content": None,
+            "anonymous": None
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+
+        url = '/issue/load_draft'
+        data = {
+            "jwt": jwt,
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)

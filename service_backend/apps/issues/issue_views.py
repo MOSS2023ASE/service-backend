@@ -12,7 +12,7 @@ from service_backend.apps.issues.models import Issue, LikeIssues, FollowIssues, 
 from service_backend.apps.utils.constants import UserRole, IssueStatus, IssueErrorCode, \
     IssueLikeErrorCode, IssueFollowErrorCode, IssueTagErrorCode, CommentErrorCode
 from service_backend.apps.utils.views import response_json, check_role
-from service_backend.apps.issues.serializers import IssueSerializer, IssueSearchSerializer
+from service_backend.apps.issues.issue_serializer import IssueSerializer, IssueSearchSerializer
 
 
 def find_issue():
