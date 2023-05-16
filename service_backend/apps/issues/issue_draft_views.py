@@ -12,7 +12,7 @@ class SaveDraft(APIView):
         chapter_id = request.data['chapter_id'] if request.data['chapter_id'] else None
         title = request.data['title'] if request.data['title'] else None
         content = request.data['content'] if request.data['content'] else None
-        anonymous = request.data['anonymous'] if request.data['anonymous'] else None
+        anonymous = request.data['anonymous'] if request.data['anonymous'] else 0
 
         origin_draft = UserDraft.objects.filter(user=action_user)
         if origin_draft:
@@ -41,7 +41,7 @@ class LoadDraft(APIView):
             "chapter_id": None,
             "title": None,
             "content": None,
-            "anonymous": None,
+            "anonymous": 0,
             "subject_id": None
         }
 
