@@ -10,6 +10,7 @@ class UserRole:
     TUTOR = 1
     ADMIN = 2
 
+
 DEFAULT_AVATAR = "https://shieask.com/pic/default_avatar.png"
 
 
@@ -87,7 +88,7 @@ class IssueTagErrorCode:
 class IssueReviewerErrorCode:
     REVIEWER_ISSUE_SAVED_FAILED = 901
 
-    
+
 class OtherErrorCode:
     UNEXPECTED_JSON_FORMAT = 1001
 
@@ -100,6 +101,7 @@ class ImageErrorCode:
     INVALID_IMAGE_FORMAT = 1105
     IMAGE_TOO_BIG = 1106
 
+
 class CommentErrorCode:
     COMMENT_NOT_FOUND = 1201
     COMMENT_DELETE_FAILED = 1202
@@ -109,3 +111,11 @@ class CommentErrorCode:
 class DraftErrorCode:
     DRAFT_SAVE_FAILED = 1301
     DRAFT_LOAD_FAILED = 1302
+
+
+class NotificationErrorCode:
+    NOTIFICATION_SAVE_FAILED = 1401
+    NOTIFICATION_LOAD_FAILED = 1402
+    NOTIFICATION_DELETE_FAILED = 1403
+    NOTIFICATION_RECEIVER_SAVE_FAILED = 1404
+    NOTIFICATION_RECEIVER_LOAD_FAILED = 1405

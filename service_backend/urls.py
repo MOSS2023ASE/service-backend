@@ -25,5 +25,6 @@ urlpatterns = [
     path('tag/', include('service_backend.apps.tags.urls')),
     path('year/', include('service_backend.apps.years.urls')),
     path('admins/', include('service_backend.apps.admins.urls')),
+    path('notification/', include('service_backend.apps.notifications.urls')),
     path('images/', include('service_backend.apps.images.urls'))
 ]
