@@ -41,7 +41,8 @@ class LoadDraft(APIView):
             "chapter_id": None,
             "title": None,
             "content": None,
-            "anonymous": None
+            "anonymous": None,
+            "subject_id": None
         }
 
         if user_draft:
@@ -49,6 +50,7 @@ class LoadDraft(APIView):
             data["title"] = user_draft.first().title
             data["content"] = user_draft.first().content
             data["anonymous"] = user_draft.first().anonymous
+            data["subject_id"] = user_draft.first().chapter.subject_id
 
         return Response(response_json(
             success=True,
