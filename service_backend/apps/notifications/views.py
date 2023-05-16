@@ -14,14 +14,6 @@ class NotificationRead(APIView):
     @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         try:
-            notification = Notification.objects.get(id=request.data['notification_id'])
-        except Exception as _e:
-            return Response(response_json(
-                success=False,
-                code=NotificationErrorCode.NOTIFICATION_LOAD_FAILED,
-                message="can't get notification!"
-            ))
-        try:
             notification_receiver = NotificationReceiver.objects.get(Q(receiver_id=action_user.id) & Q(notification_id=request.data['notification_id']))
         except Exception as _e:
             return Response(response_json(
@@ -42,10 +34,11 @@ class NotificationRead(APIView):
             success=True,
             message="get notification successfully!",
             data={
-                "title": notification.title,
-                "content": notification.content,
-                "time": str(notification.created_at),
-                "category": notification.category
+                "title": notification_receiver.notification.title,
+                "content": notification_receiver.notification.content,
+                "time": str(notification_receiver.notification.created_at),
+                "category": notification_receiver.notification.category,
+                "status": notification_receiver.status
             }
         ))
 
@@ -106,7 +99,7 @@ class NotificationList(APIView):
 
 class NotificationBroadcast(APIView):
 
-    @check_role(UserRole.ALL_USERS)
+    @check_role(UserRole.ADMIN_ONLY)
     def post(self, request, action_user: User = None):
         try:
             notification = Notification(
