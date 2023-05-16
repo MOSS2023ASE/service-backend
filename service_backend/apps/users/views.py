@@ -191,15 +191,7 @@ class ModifyUserSubject(APIView):
 
     @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
-        tutor_student_id, subject_id_list = request.data['tutor_student_id'], request.data['subject_id_list']
-        try:
-            tutor_id = User.objects.get(student_id=tutor_student_id).id
-        except Exception as _e:
-            return Response(response_json(
-                success=False,
-                code=UserErrorCode.USER_NOT_FOUND,
-                message='no such student id!'
-            ))
+        tutor_id, subject_id_list = request.data['tutor_id'], request.data['subject_id_list']
         try:
             UserSubject.objects.filter(user_id=tutor_id).delete()
             user_subject_list = [UserSubject(user_id=tutor_id, subject_id=subject_id)
