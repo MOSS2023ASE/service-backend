@@ -5,7 +5,8 @@ from rest_framework.views import APIView
 from service_backend.apps.notifications.models import Notification, NotificationReceiver
 from service_backend.apps.users.models import User
 from service_backend.apps.utils.views import response_json, encode_password, check_role
-from service_backend.apps.utils.constants import UserErrorCode, UserRole, OtherErrorCode, DEFAULT_AVATAR, NotificationErrorCode
+from service_backend.apps.utils.constants import UserErrorCode, UserRole, OtherErrorCode, DEFAULT_AVATAR, \
+    NotificationErrorCode
 
 
 # Create your views here.
@@ -14,7 +15,8 @@ class NotificationRead(APIView):
     @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         try:
-            notification_receiver = NotificationReceiver.objects.get(Q(receiver_id=action_user.id) & Q(notification_id=request.data['notification_id']))
+            notification_receiver = NotificationReceiver.objects.get(
+                Q(receiver_id=action_user.id) & Q(notification_id=request.data['notification_id']))
         except Exception as _e:
             return Response(response_json(
                 success=False,
@@ -67,11 +69,9 @@ class NotificationList(APIView):
     @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
         try:
-            page_no, notification_per_page = request.data['page_no'], request.data['notification_per_page']
             notification_list = NotificationReceiver.objects.filter(
-                receiver_id=action_user.id).order_by(
-                '-created_at').distinct()
-            notification_list = notification_list[(page_no - 1) * notification_per_page: page_no * notification_per_page].select_related('notification')
+                receiver_id=action_user.id).order_by('status', '-created_at').distinct()
+            notification_list = notification_list.select_related('notification')
         except Exception as e:
             return Response(response_json(
                 success=False,

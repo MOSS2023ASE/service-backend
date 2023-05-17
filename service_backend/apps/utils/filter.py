@@ -5,7 +5,7 @@ class Filter:
 
     def parse(self, path="keyword"):
         try:
-            f = open(path)
+            f = open(path, 'r', encoding='utf-8')
         except Exception as e:
             return
         for keyword in f:
