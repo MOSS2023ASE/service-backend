@@ -1,3 +1,4 @@
+from django.db.models import Count
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from service_backend.apps.users.models import User, BlackList
@@ -39,7 +40,7 @@ class UserLogin(APIView):
         try:
             # if no invalid id, User.objects.get will raise exception
             user = User.objects.get(student_id=request.data['student_id'])
-        except Exception as e:
+        except Exception as _e:
             return Response(
                 response_json(
                     success=False,
@@ -54,7 +55,7 @@ class UserLogin(APIView):
                 raise Exception()
             jwt_token = generate_jwt(user.id)
             # print(jwt_token)
-        except Exception as e:
+        except Exception as _e:
             return Response(response_json(
                 success=False,
                 code=UserErrorCode.INCORRECT_PASSWORD,
@@ -238,7 +239,8 @@ class GetReviewIssue(APIView):
                 code=IssueErrorCode.REVIEW_ISSUE_QUERY_FAILED,
                 message="query review issue failed!"
             ))
-        issue_list = issue_list[(page_no - 1) * issue_per_page: page_no * issue_per_page]
+        issue_list = issue_list[(page_no - 1) * issue_per_page: page_no * issue_per_page].select_related(
+            'chapter').select_related('chapter__subject')
         return Response(response_json(
             success=True,
             message="query review issue successfully!",
@@ -309,4 +311,33 @@ class GetAskIssue(APIView):
             success=True,
             message="query ask issue successfully!",
             data=_issue_list_to_json(issue_list)
+        ))
+
+
+class GetActiveUser(APIView):
+    @check_role(UserRole.ALL_USERS)
+    def post(self, request, action_user: User = None):
+        try:
+            top_k = request.data['top_k']
+            user_list = User.objects.all().annotate(total_issue=Count('user_issues')).order_by('-total_issue')
+            user_list = user_list[:top_k]
+        except Exception as _e:
+            return Response(response_json(
+                success=False,
+                code=UserErrorCode.USER_LOAD_FAILED,
+                message="can't get user list!"
+            ))
+        return Response(response_json(
+            success=True,
+            message="get active user successfully!",
+            data={
+                "user_list": [{
+                    "user_id": user.id,
+                    "student_id": user.student_id,
+                    "name": user.name,
+                    "user_role": user.user_role,
+                    "frozen": user.frozen,
+                    "avatar": user.avatar
+                } for user in user_list]
+            }
         ))

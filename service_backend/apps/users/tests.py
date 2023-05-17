@@ -12,7 +12,6 @@ from service_backend.apps.utils.views import encode_password, decode_jwt
 class UserAPITestCase(APITestCase):
 
     def setUp(self):
-        User.objects.all().delete()
         User.objects.bulk_create([
             User(id=1, student_id='20373743', name='ccy', password_digest=encode_password('123456'), user_role=2,
                  frozen=0),
@@ -24,25 +23,26 @@ class UserAPITestCase(APITestCase):
                  frozen=0),
             User(id=5, student_id='20373046', name='yyy', password_digest=encode_password('123456'), user_role=1,
                  frozen=0),
+            User(id=6, student_id='20373001', name='1', password_digest=encode_password('123456'), user_role=0,
+                 frozen=0),
+            User(id=7, student_id='20373002', name='2', password_digest=encode_password('123456'), user_role=0,
+                 frozen=0),
+            User(id=8, student_id='20373003', name='3', password_digest=encode_password('123456'), user_role=0,
+                 frozen=0),
         ])
-        Year.objects.all().delete()
         Year.objects.bulk_create([Year(id=1, content='2023年')])
-        Subject.objects.all().delete()
         Subject.objects.bulk_create([
             Subject(id=1, name='数学分析2', content='...', year_id=1),
             Subject(id=2, name='大学物理', content='...', year_id=1),
         ])
-        Chapter.objects.all().delete()
         Chapter.objects.bulk_create([
             Chapter(id=1, subject_id=1, name='多元函数求导', content='hh'),
             Chapter(id=2, subject_id=2, name='角动量', content='hhh'),
         ])
-        UserSubject.objects.all().delete()
         UserSubject.objects.bulk_create([
             UserSubject(id=1, user_id=3, subject_id=1),
             UserSubject(id=2, user_id=3, subject_id=2),
         ])
-        Issue.objects.all().delete()
         Issue.objects.bulk_create([
             Issue(id=1, title='1', content='123', user_id=1, chapter_id=1, counselor_id=4, reviewer_id=3, status=0,
                   anonymous=0, score=0),
@@ -55,7 +55,6 @@ class UserAPITestCase(APITestCase):
             Issue(id=5, title='5', content='123', user_id=1, chapter_id=1, counselor_id=4, reviewer_id=3, status=0,
                   anonymous=0, score=0)
         ])
-        ReviewIssues.objects.all().delete()
         ReviewIssues.objects.bulk_create([
             ReviewIssues(id=1, user_id=1, reviewed_id=3, issue_id=1, status=0),
             ReviewIssues(id=2, user_id=1, reviewed_id=3, issue_id=3, status=0),
@@ -63,7 +62,6 @@ class UserAPITestCase(APITestCase):
             ReviewIssues(id=4, user_id=1, reviewed_id=4, issue_id=2, status=0),
             ReviewIssues(id=5, user_id=1, reviewed_id=4, issue_id=4, status=0),
         ])
-        AdoptIssues.objects.all().delete()
         AdoptIssues.objects.bulk_create([
             AdoptIssues(id=1, user_id=4, issue_id=1, status=0),
             AdoptIssues(id=2, user_id=4, issue_id=3, status=0),
@@ -71,7 +69,6 @@ class UserAPITestCase(APITestCase):
             AdoptIssues(id=4, user_id=3, issue_id=2, status=0),
             AdoptIssues(id=5, user_id=3, issue_id=4, status=0),
         ])
-        FollowIssues.objects.all().delete()
         FollowIssues.objects.bulk_create([
             FollowIssues(id=1, user_id=2, issue_id=1),
             FollowIssues(id=2, user_id=2, issue_id=3),
@@ -133,6 +130,18 @@ class UserAPITestCase(APITestCase):
         self.assertEqual(response.data['code'], 0)
         self.assertEqual(response.data['data']['role'], 1)
         self.assertTrue(decode_jwt(response.data['data']['jwt'])[0])
+        return response.data['data']['jwt']
+
+    def _student_login_6(self):
+        response = self.client.post('/user/user_login', {'student_id': '20373001', 'password': '123456'})
+        return response.data['data']['jwt']
+
+    def _student_login_7(self):
+        response = self.client.post('/user/user_login', {'student_id': '20373002', 'password': '123456'})
+        return response.data['data']['jwt']
+
+    def _student_login_8(self):
+        response = self.client.post('/user/user_login', {'student_id': '20373003', 'password': '123456'})
         return response.data['data']['jwt']
 
     def test_password_modify(self):
@@ -351,3 +360,75 @@ class UserAPITestCase(APITestCase):
         self.assertEqual(response.data['code'], 0)
         self.assertEqual(len(response.data['data']['issue_list']), 2)
         self.assertEqual({issue['issue_id'] for issue in response.data['data']['issue_list']}, {1, 3})
+
+    def test_get_active_user(self):
+        jwt6 = self._student_login_6()
+        jwt7 = self._student_login_7()
+        jwt8 = self._student_login_8()
+        url = '/issue/commit'
+        data_list = [
+            {
+                "jwt": jwt6,
+                "chapter_id": 2,
+                "title": "1_6",
+                "content": "1st of user 6",
+                "anonymous": 0
+            },
+            {
+                "jwt": jwt6,
+                "chapter_id": 2,
+                "title": "2_6",
+                "content": "2nd of user 6",
+                "anonymous": 0
+            },
+            {
+                "jwt": jwt7,
+                "chapter_id": 2,
+                "title": "1_7",
+                "content": "1st of user 7",
+                "anonymous": 0
+            },
+            {
+                "jwt": jwt8,
+                "chapter_id": 2,
+                "title": "1_8",
+                "content": "1st of user 8",
+                "anonymous": 0
+            },
+            {
+                "jwt": jwt8,
+                "chapter_id": 1,
+                "title": "2_8",
+                "content": "2nd of user 8",
+                "anonymous": 0
+            },
+            {
+                "jwt": jwt8,
+                "chapter_id": 1,
+                "title": "3_8",
+                "content": "3rd of user 8",
+                "anonymous": 0
+            },
+        ]
+        for data in data_list:
+            self.client.post(url, data=json.dumps(data), content_type='application/json')
+        url = '/user/active_users'
+        data = {
+            "jwt": jwt6,
+            "top_k": 3
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+        self.assertEqual(len(response.data['data']['user_list']), 3)
+        self.assertEqual(response.data['data']['user_list'][0]['user_id'], 1)
+        self.assertEqual(response.data['data']['user_list'][1]['user_id'], 8)
+        self.assertEqual(response.data['data']['user_list'][2]['user_id'], 6)
+        url = '/user/active_users'
+        data = {
+            "jwt": jwt7,
+            "top_k": 5
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+        self.assertEqual(len(response.data['data']['user_list']), 5)
+        return
