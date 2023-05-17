@@ -38,6 +38,7 @@ class UserErrorCode:
     USER_SAVE_FAILED = 205
     USER_FROZEN = 206
     PERMISSION_DENIED = 207
+    USER_LOAD_FAILED = 208
 
 
 class SubjectErrorCode:
