@@ -5,3 +5,4 @@ env.json
 db.sqlite3
 settings_copy.py
 static
+keyword

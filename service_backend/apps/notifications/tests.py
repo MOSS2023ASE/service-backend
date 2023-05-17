@@ -42,9 +42,7 @@ class IssueAPITestCase(APITestCase):
         jwt = self._student_login()
         url = '/notification/user_receive'
         data = {
-            "jwt": jwt,
-            "page_no": 1,
-            "notification_per_page": 10
+            "jwt": jwt
         }
         response = self.client.post(url, data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.data['code'], 0)
@@ -84,9 +82,7 @@ class IssueAPITestCase(APITestCase):
         jwt = self._student_login()
         url = '/notification/user_receive'
         data = {
-            "jwt": jwt,
-            "page_no": 1,
-            "notification_per_page": 10
+            "jwt": jwt
         }
         response = self.client.post(url, data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.data['code'], 0)
@@ -94,7 +90,7 @@ class IssueAPITestCase(APITestCase):
         # clear
         url = '/notification/clear_all'
         data = {
-            "jwt": jwt,
+            "jwt": jwt
         }
         response = self.client.post(url, data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.data['code'], 0)
@@ -102,8 +98,6 @@ class IssueAPITestCase(APITestCase):
         url = '/notification/user_receive'
         data = {
             "jwt": jwt,
-            "page_no": 1,
-            "notification_per_page": 10
         }
         response = self.client.post(url, data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.data['code'], 0)
@@ -115,9 +109,7 @@ class IssueAPITestCase(APITestCase):
         jwt = self._student_login()
         url = '/notification/user_receive'
         data = {
-            "jwt": jwt,
-            "page_no": 1,
-            "notification_per_page": 10
+            "jwt": jwt
         }
         response = self.client.post(url, data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.data['code'], 0)
