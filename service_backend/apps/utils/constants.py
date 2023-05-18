@@ -67,6 +67,7 @@ class IssueErrorCode:
     FOLLOW_ISSUE_QUERY_FAILED = 606
     ASK_ISSUE_QUERY_FAILED = 607
     ISSUE_ACTION_REJECT = 608
+    ISSUE_RELATE_FAILED = 609
 
 
 class IssueLikeErrorCode:

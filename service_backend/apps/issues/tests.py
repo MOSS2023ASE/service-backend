@@ -67,6 +67,10 @@ class IssueAPITestCase(APITestCase):
                       status=IssueStatus.NOT_ADOPT, anonymous=0)
         issue.save()
         self.issue = issue
+        issue = Issue(title='问题测试2', content="内容测试2", user=user, chapter=self.chapter,
+                      status=IssueStatus.NOT_ADOPT, anonymous=0)
+        issue.save()
+        self.issue_2 = issue
 
         tag = Tag(content="tag_1")
         tag.save()
@@ -318,4 +322,34 @@ class IssueAPITestCase(APITestCase):
             "jwt": jwt,
         }
         response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+
+    def test_associate(self):
+        jwt = self._admin_login()
+        add_url = '/issue/associate'
+        get_url = '/issue/associate/get'
+        delete_url = '/issue/associate/delete'
+        add_data = {
+            "jwt": jwt,
+            "issue_id": self.issue.id,
+            "issue_associate_id": self.issue_2.id
+        }
+        get_data = {
+            "jwt": jwt,
+            "issue_id": self.issue.id
+        }
+        delete_data = {
+            "jwt": jwt,
+            "issue_id": self.issue.id,
+            "issue_associate_id": self.issue_2.id
+        }
+        response = self.client.post(add_url, data=json.dumps(add_data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+        response = self.client.post(add_url, data=json.dumps(add_data), content_type='application/json')
+        self.assertEqual(response.data['code'], 609)
+        response = self.client.post(get_url, data=json.dumps(get_data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+        response = self.client.post(delete_url, data=json.dumps(delete_data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+        response = self.client.post(get_url, data=json.dumps(get_data), content_type='application/json')
         self.assertEqual(response.data['code'], 0)
