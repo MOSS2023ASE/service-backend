@@ -12,7 +12,7 @@ from service_backend.apps.issues.models import Issue, LikeIssues, FollowIssues, 
 from service_backend.apps.utils.constants import UserRole, IssueStatus, IssueErrorCode, \
     IssueLikeErrorCode, IssueFollowErrorCode, IssueTagErrorCode, CommentErrorCode
 from service_backend.apps.utils.views import response_json, check_role
-from service_backend.apps.issues.issue_serializer import IssueSerializer, IssueSearchSerializer
+from service_backend.apps.issues.serializer_issue import IssueSerializer, IssueSearchSerializer
 
 
 def find_issue():
@@ -105,6 +105,15 @@ def allow_comment(issue, action_user):
     return allow
 
 
+def allow_relate(issue, action_user):
+    allow = 0
+    if (issue.status == IssueStatus.ADOPTING and action_user == issue.counselor) or \
+            (issue.status == IssueStatus.REVIEWING and action_user == issue.reviewer) or \
+            action_user.user_role == UserRole.ADMIN:
+        allow = 1
+    return allow
+
+
 ########################################################################################################################
 
 class IssueGet(APIView):
@@ -136,6 +145,7 @@ class IssueGet(APIView):
         } for reviewer_issue in reviewer_issues]
         data['allow_comment'] = allow_comment(issue, action_user)
         data['status_trans_permit'] = status_trans_permit(issue, action_user)
+        data['allow_relate'] = allow_relate(issue, action_user)
         data['counselor_list'] = counselor_list
         data['reviewer_list'] = reviewer_list
         return Response(response_json(

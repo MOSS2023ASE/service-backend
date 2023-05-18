@@ -93,3 +93,11 @@ class UserDraft(MyModel):
 
     class Meta:
         db_table = 'user_drafts'
+
+
+class IssueAssociations(MyModel):
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='associate_issues_as_from')
+    associate_issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='associate_issues_as_to')
+
+    class Meta:
+        db_table = 'issue_associations'
