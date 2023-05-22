@@ -1,4 +1,5 @@
 import random
+import re
 import smtplib
 from email.header import Header
 from email.mime.text import MIMEText
@@ -12,6 +13,14 @@ def _format_addr(s):
 
 def gen_vcode(length=4):
     return ''.join(random.choices('0123456789', k=length))
+
+
+def is_valid(email) -> bool:
+    regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
+    if re.fullmatch(regex, email):
+        return True
+    else:
+        return False
 
 
 def gen_vcode_msg(vcode, to_addr, from_addr='moss_se2023@163.com'):
@@ -44,7 +53,6 @@ def send_vcode(to_addr, smtp_server='smtp.163.com', from_addr='moss_se2023@163.c
     server.sendmail(from_addr, to_addr, msg.as_string())
     server.quit()
     return vcode
-
 
 # if __name__ == "__main__":
 #     to = '20373228@buaa.edu.cn'

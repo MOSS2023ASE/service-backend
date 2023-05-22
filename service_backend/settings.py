@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'service_backend.apps.tags',
     'service_backend.apps.users',
     'service_backend.apps.years',
-    'service_backend.apps.notifications',
+    'service_backend.apps.mail',
+    'service_backend.apps.notifications'
 ]
 
 MIDDLEWARE = [
