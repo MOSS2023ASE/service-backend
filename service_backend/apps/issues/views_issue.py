@@ -120,15 +120,6 @@ class IssueGet(APIView):
     @check_role(UserRole.ALL_USERS)
     @find_issue()
     def post(self, request, issue, action_user):
-        if action_user.user_role == UserRole.STUDENT and \
-                action_user.id != issue.user_id and \
-                issue.status != IssueStatus.VALID_ISSUE:
-            return Response(response_json(
-                success=False,
-                code=IssueErrorCode.ISSUE_ACTION_REJECT,
-                message="you have no access to this issue!"
-            ), status=404)
-
         issue_serializer = IssueSerializer(issue)
         data = issue_serializer.data
         adopter_issues = AdoptIssues.objects.filter(issue=issue).order_by('created_at')
