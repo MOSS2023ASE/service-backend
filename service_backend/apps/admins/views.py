@@ -1,3 +1,6 @@
+from datetime import date, datetime, timedelta, time
+
+from django.db.models import Q, Count
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from service_backend.apps.users.models import User
@@ -187,3 +190,30 @@ class DeleteIssue(APIView):
             success=True,
             message="delete issue successfully!"
         ))
+
+
+class GetStatistic(APIView):
+    @check_role(UserRole.ADMIN_ONLY)
+    def post(self, request, action_user: User = None):
+        tp, indicator = request.data['type'], request.data['indicator']
+        begin_date, end_date = date.fromisoformat(str(request.data['begin_date']).strip()), date.fromisoformat(str(request.data['end_date']).strip())
+        begin_datetime, end_datetime = datetime.combine(begin_date, time.min), datetime.combine(end_date, time.max)
+        res_list = []
+        if indicator == 0:
+            issue_query_set = Issue.objects.all().filter(Q(counsel_at__gte=begin_datetime) & Q(counsel_at__lte=end_datetime))
+            if tp == 0:
+                cur_date = begin_date
+                while cur_date <= end_date:
+                    cnt = issue_query_set.filter(Q(counsel_at__gte=datetime.combine(cur_date, date.min)) & Q(counsel_at__lte=datetime.combine(cur_date, date.max)))
+                    res_list += cnt
+                    cur_date += timedelta(days=1)
+            else:
+                count_list = issue_query_set.values('counselor_id').annotate(count=Count('counselor_id'))
+                res_list = [cnt['count'] for cnt in count_list]
+        elif indicator == 1:
+            pass
+        elif indicator == 2:
+            pass
+        else:
+            pass
+
