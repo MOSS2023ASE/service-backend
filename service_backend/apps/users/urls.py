@@ -18,5 +18,6 @@ urlpatterns = [
     path('get_ask_issue', views.GetAskIssue.as_view()),
     path('get_follow_issue', views.GetFollowIssue.as_view()),
 
-    path('active_users', views.GetActiveUser.as_view())
+    path('active_users', views.GetActiveUser.as_view()),
+    path('get_popular_issue', views.GetPopularIssue.as_view()),
 ]

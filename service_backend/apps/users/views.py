@@ -1,11 +1,16 @@
 from django.db.models import Count
+from django.db.models import F
+from datetime import datetime
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from service_backend.apps.issues.serializer_issue import IssueSearchSerializer
 from service_backend.apps.users.models import User, BlackList
 from service_backend.apps.subjects.models import UserSubject, Subject
 from service_backend.apps.issues.models import ReviewIssues, FollowIssues, LikeIssues, AdoptIssues, Issue
+from service_backend.apps.issues.views_issue import status_trans_permit
 from service_backend.apps.utils.views import response_json, encode_password, generate_jwt, check_role
-from service_backend.apps.utils.constants import UserErrorCode, SubjectErrorCode, IssueErrorCode, UserRole
+from service_backend.apps.utils.constants import UserErrorCode, SubjectErrorCode, IssueErrorCode, UserRole, IssueStatus
 
 
 # Create your views here.
@@ -31,6 +36,10 @@ def _issue_list_to_json(issue_list):
             for issue in issue_list
         ]
         }
+
+
+def cal_popular():
+    pass
 
 
 class UserLogin(APIView):
@@ -311,6 +320,51 @@ class GetAskIssue(APIView):
             success=True,
             message="query ask issue successfully!",
             data=_issue_list_to_json(issue_list)
+        ))
+
+
+class GetPopularIssue(APIView):
+
+    @check_role(UserRole.ALL_USERS)
+    def post(self, request, action_user: User = None):
+        # 选择前k个有效的issue, 按照likes数量降序排列
+        # 可选项last_week:展示最近一周(按照review_at的时间判断)的popular issue
+        # TODO: 可以把week扩展到month以及all time
+        last_week = False
+        top_k = request.data['top_k']
+        issue_list = Issue.objects.all().filter(status=IssueStatus.VALID_ISSUE).order_by('-likes')
+        if last_week:
+            issue_list = [issue for issue in issue_list if
+                          (datetime.now() - datetime.fromisoformat(issue.review_at)).seconds < 7 * 24 * 3600]
+        issue_list = issue_list[:top_k]
+        return Response(response_json(
+            success=True,
+            data={
+                "issue_list": [
+                    {
+                        'issue_id': issue.id,
+                        'create_at': str(issue.created_at),
+                        'update_at': str(issue.updated_at),
+                        'title': issue.title,
+                        'content': issue.content,
+                        'user_id': issue.user_id,
+                        'user_name': issue.user.name,
+                        'user_avatar': issue.user.avatar,
+                        'counselor_id': issue.counselor_id,
+                        'counsel_at': str(issue.counsel_at),
+                        'reviewer_id': issue.reviewer_id,
+                        'reviewer_at': issue.review_at,
+                        'chapter_id': issue.chapter_id,
+                        'chapter_name': issue.chapter.name,
+                        'subject_id': issue.chapter.subject_id,
+                        'subject_name': issue.chapter.subject.name,
+                        'status': issue.status,
+                        'anonymous': issue.anonymous,
+                        'score': issue.score,
+                        'like_count': issue.likes,
+                        'follow_count': issue.follows
+                    } for issue in issue_list]
+            }
         ))
 
 

@@ -45,6 +45,7 @@ class NotificationRead(APIView):
         ))
 
 
+# TODO: 修改为一键已读
 class NotificationClear(APIView):
 
     @check_role(UserRole.ALL_USERS)
