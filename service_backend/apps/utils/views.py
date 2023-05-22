@@ -1,3 +1,5 @@
+from django.db.models import Count
+
 from service_backend.apps.utils.constants import GlobalCode, UserErrorCode
 from service_backend.apps.users.models import User, BlackList
 from service_backend.apps.issues.models import Issue, ReviewIssues, AdoptIssues, LikeIssues, FollowIssues
