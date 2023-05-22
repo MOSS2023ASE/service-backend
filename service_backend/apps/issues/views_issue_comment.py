@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 from service_backend.apps.issues.models import Comment
 from service_backend.apps.utils.constants import UserRole, CommentErrorCode
 from service_backend.apps.utils.views import response_json, check_role
-from service_backend.apps.issues.serializers import CommentSerializer
-from service_backend.apps.issues.v_issue import find_issue, find_comment
+from service_backend.apps.issues.serializer_comment import CommentSerializer
+from service_backend.apps.issues.views_issue import find_issue, find_comment
 
 
 class CommentList(APIView):
@@ -31,7 +31,7 @@ class CommentCreate(APIView):
             return Response(response_json(
                 success=False,
                 code=CommentErrorCode.COMMENT_SAVED_FAILED,
-                message="can't save comment!"
+                message="can't save comment! probably have sensitive word!"
             ), status=404)
 
         return Response(response_json(
@@ -51,7 +51,7 @@ class CommentUpdate(APIView):
             return Response(response_json(
                 success=False,
                 code=CommentErrorCode.COMMENT_SAVED_FAILED,
-                message="can't save comment!"
+                message="can't save comment! probably have sensitive word!"
             ), status=404)
 
         return Response(response_json(

@@ -69,7 +69,6 @@ class CreateUserBatch(APIView):
                                 user_role=role, mail=f"{student_id}@buaa.edu.cn", avatar=DEFAULT_AVATAR)
                 user.save()
             except Exception as _e:
-                raise _e
                 return Response(response_json(
                     success=False,
                     code=UserErrorCode.USER_SAVE_FAILED,

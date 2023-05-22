@@ -3,7 +3,6 @@ import json
 from rest_framework.test import APITestCase
 
 from service_backend.apps.chapters.models import Chapter
-from service_backend.apps.chapters.serializers import ChapterSerializer
 from service_backend.apps.issues.models import Issue, Comment
 from service_backend.apps.subjects.models import Subject, UserSubject
 from service_backend.apps.tags.models import Tag
@@ -64,9 +63,14 @@ class IssueAPITestCase(APITestCase):
         chapter = Chapter(name='chapter_2', content='content_2', subject=subject)
         chapter.save()
 
-        issue = Issue(title='issue', user=user, chapter=self.chapter, status=IssueStatus.NOT_ADOPT, anonymous=0)
+        issue = Issue(title='问题测试', content="内容测试", user=user, chapter=self.chapter,
+                      status=IssueStatus.NOT_ADOPT, anonymous=0)
         issue.save()
         self.issue = issue
+        issue = Issue(title='问题测试2', content="内容测试2", user=user, chapter=self.chapter,
+                      status=IssueStatus.NOT_ADOPT, anonymous=0)
+        issue.save()
+        self.issue_2 = issue
 
         tag = Tag(content="tag_1")
         tag.save()
@@ -154,11 +158,11 @@ class IssueAPITestCase(APITestCase):
             "jwt": jwt,
             "chapter_id": self.chapter.id,
             "title": "issue_title",
-            "content": "issue_sexy",
+            "content": "习近平",
             "anonymous": 0
         }
         response = self.client.post(url, data)
-        self.assertEqual(response.data['code'], 0)
+        self.assertEqual(response.data['message'], "can't save issue! probably have sensitive word!")
         return
 
     def test_follow(self):
@@ -299,3 +303,53 @@ class IssueAPITestCase(APITestCase):
         response = self.client.delete(url, data)
         self.assertEqual(response.data['code'], 0)
         return
+
+    def test_draft(self):
+        jwt = self._student_login()
+        url = '/issue/save_draft'
+        data = {
+            "jwt": jwt,
+            "chapter_id": self.chapter.id,
+            "title": None,
+            "content": None,
+            "anonymous": None
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+
+        url = '/issue/load_draft'
+        data = {
+            "jwt": jwt,
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+
+    def test_associate(self):
+        jwt = self._admin_login()
+        add_url = '/issue/associate'
+        get_url = '/issue/associate/get'
+        delete_url = '/issue/associate/delete'
+        add_data = {
+            "jwt": jwt,
+            "issue_id": self.issue.id,
+            "issue_associate_id": self.issue_2.id
+        }
+        get_data = {
+            "jwt": jwt,
+            "issue_id": self.issue.id
+        }
+        delete_data = {
+            "jwt": jwt,
+            "issue_id": self.issue.id,
+            "issue_associate_id": self.issue_2.id
+        }
+        response = self.client.post(add_url, data=json.dumps(add_data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+        response = self.client.post(add_url, data=json.dumps(add_data), content_type='application/json')
+        self.assertEqual(response.data['code'], 609)
+        response = self.client.post(get_url, data=json.dumps(get_data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+        response = self.client.post(delete_url, data=json.dumps(delete_data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+        response = self.client.post(get_url, data=json.dumps(get_data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
