@@ -8,7 +8,8 @@ from rest_framework.views import APIView
 from service_backend.apps.chapters.views import find_chapter
 from service_backend.apps.subjects.models import UserSubject
 from service_backend.apps.tags.models import IssueTag, Tag
-from service_backend.apps.issues.models import Issue, LikeIssues, FollowIssues, AdoptIssues, ReviewIssues, Comment
+from service_backend.apps.issues.models import Issue, LikeIssues, FollowIssues, AdoptIssues, ReviewIssues, Comment, \
+    IssueApiCall
 from service_backend.apps.utils.constants import UserRole, IssueStatus, IssueErrorCode, \
     IssueLikeErrorCode, IssueFollowErrorCode, IssueTagErrorCode, CommentErrorCode
 from service_backend.apps.utils.views import response_json, check_role
@@ -114,7 +115,13 @@ def allow_relate(issue, action_user):
     return allow
 
 
+def _rec_api(issue, action_user):
+    api_call = IssueApiCall(issue=issue, user=action_user)
+    api_call.save()
+
+
 ########################################################################################################################
+
 
 class IssueGet(APIView):
     @check_role(UserRole.ALL_USERS)
@@ -139,6 +146,7 @@ class IssueGet(APIView):
         data['allow_relate'] = allow_relate(issue, action_user)
         data['counselor_list'] = counselor_list
         data['reviewer_list'] = reviewer_list
+        _rec_api(issue, action_user)
         return Response(response_json(
             success=True,
             data=data

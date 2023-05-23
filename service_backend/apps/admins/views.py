@@ -4,7 +4,7 @@ from django.db.models import Q, Count
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from service_backend.apps.users.models import User
-from service_backend.apps.issues.models import Issue
+from service_backend.apps.issues.models import Issue, IssueApiCall
 from service_backend.apps.users.serializers import UserSerializer
 from service_backend.apps.utils.views import response_json, encode_password, check_role
 from service_backend.apps.utils.constants import UserErrorCode, UserRole, OtherErrorCode, IssueErrorCode, DEFAULT_AVATAR
@@ -192,7 +192,7 @@ class DeleteIssue(APIView):
         ))
 
 
-class GetStatistic(APIView):
+class GetStatistics(APIView):
     @check_role(UserRole.ADMIN_ONLY)
     def post(self, request, action_user: User = None):
         tp, indicator = request.data['type'], request.data['indicator']
@@ -204,16 +204,45 @@ class GetStatistic(APIView):
             if tp == 0:
                 cur_date = begin_date
                 while cur_date <= end_date:
-                    cnt = issue_query_set.filter(Q(counsel_at__gte=datetime.combine(cur_date, date.min)) & Q(counsel_at__lte=datetime.combine(cur_date, date.max)))
-                    res_list += cnt
+                    cnt = issue_query_set.filter(Q(counsel_at__gte=datetime.combine(cur_date, time.min)) & Q(counsel_at__lte=datetime.combine(cur_date, time.max))).count()
+                    res_list.append(cnt)
                     cur_date += timedelta(days=1)
             else:
                 count_list = issue_query_set.values('counselor_id').annotate(count=Count('counselor_id'))
                 res_list = [cnt['count'] for cnt in count_list]
         elif indicator == 1:
-            pass
+            issue_query_set = Issue.objects.all().filter(
+                Q(review_at__gte=begin_datetime) & Q(review_at__lte=end_datetime))
+            if tp == 0:
+                cur_date = begin_date
+                while cur_date <= end_date:
+                    cnt = issue_query_set.filter(Q(review_at__gte=datetime.combine(cur_date, time.min)) & Q(
+                        review_at__lte=datetime.combine(cur_date, time.max))).count()
+                    res_list.append(cnt)
+                    cur_date += timedelta(days=1)
+            else:
+                count_list = issue_query_set.values('reviewer_id').annotate(count=Count('reviewer_id'))
+                res_list = [cnt['count'] for cnt in count_list]
         elif indicator == 2:
-            pass
+            api_call_query_set = IssueApiCall.objects.all().filter(
+                Q(created_at__gte=begin_datetime) & Q(created_at__lte=end_datetime))
+            if tp == 0:
+                cur_date = begin_date
+                while cur_date <= end_date:
+                    cnt = api_call_query_set.filter(Q(created_at__gte=datetime.combine(cur_date, time.min)) & Q(
+                        created_at__lte=datetime.combine(cur_date, time.max))).count()
+                    res_list.append(cnt)
+                    cur_date += timedelta(days=1)
+            else:
+                count_list = api_call_query_set.values('issue_id').annotate(count=Count('issue_id'))
+                res_list = [cnt['count'] for cnt in count_list]
         else:
             pass
-
+        # res_list = sorted(res_list)
+        return Response(response_json(
+            success=True,
+            message="get statistics successfully!",
+            data={
+                'list': res_list
+            }
+        ))

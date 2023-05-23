@@ -19,3 +19,6 @@ class NotificationReceiver(MyModel):
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_notifications')
     status = models.IntegerField(default=0)
 
+    class Meta:
+        db_table = 'notification_receivers'
+
