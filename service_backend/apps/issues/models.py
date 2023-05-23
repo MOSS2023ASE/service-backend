@@ -101,3 +101,11 @@ class IssueAssociations(MyModel):
 
     class Meta:
         db_table = 'issue_associations'
+
+
+class IssueApiCall(MyModel):
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='issue_api_call_history')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='issue_api_call_history')
+
+    class Meta:
+        db_table = 'issue_api_calls'
