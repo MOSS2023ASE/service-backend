@@ -25,6 +25,7 @@ class SendMail(APIView):
             ))
 
         if mail_confirm:
+            mail_confirm = mail_confirm.first()
             mail_confirm.vcode = vcode
         else:
             mail_confirm = MailConfirm(email=mail, vcode=vcode)
