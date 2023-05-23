@@ -14,10 +14,10 @@ from service_backend.apps.utils.views import response_json, encode_password
 # Create your views here.
 class SendMail(APIView):
     def post(self, request):
-        mail = request.data['mail']
-        vcode = send_vcode(mail)
-        mail_confirm = MailConfirm.objects.filter(email=mail)
-        if not is_valid(mail):
+        to_mail = request.data['mail']
+        vcode = send_vcode(to_mail)
+        mail_confirm = MailConfirm.objects.filter(email=to_mail)
+        if not is_valid(to_mail):
             return Response(response_json(
                 success=False,
                 code=MailErrorCode.MAIL_FORMAT_WRONG,
@@ -28,7 +28,7 @@ class SendMail(APIView):
             mail_confirm = mail_confirm.first()
             mail_confirm.vcode = vcode
         else:
-            mail_confirm = MailConfirm(email=mail, vcode=vcode)
+            mail_confirm = MailConfirm(email=to_mail, vcode=vcode)
 
         try:
             mail_confirm.save()
