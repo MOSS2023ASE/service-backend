@@ -41,7 +41,7 @@ class CommentCreate(APIView):
                 notification = Notification(
                     title="【issue回复通知】",
                     content="你的问题:\"{}\" 有辅导师的新回答～".format(issue.title),
-                    category=NotificationCategory.Issue
+                    category=NotificationCategory.ISSUE
                 )
                 notification.save()
             except Exception:

@@ -26,7 +26,7 @@ class IssueStatus:
 
 class NotificationCategory:
     GLOBAL = 0
-    Issue = 1
+    ISSUE = 1
 
 
 class YearErrorCode:
