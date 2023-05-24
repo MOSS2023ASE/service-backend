@@ -24,6 +24,11 @@ class IssueStatus:
     INVALID_ISSUE = 5
 
 
+class NotificationCategory:
+    GLOBAL = 0
+    Issue = 1
+
+
 class YearErrorCode:
     YEAR_SAVE_FAILED = 101
     YEAR_DOES_NOT_EXIST = 102
@@ -108,8 +113,8 @@ class CommentErrorCode:
     COMMENT_NOT_FOUND = 1201
     COMMENT_DELETE_FAILED = 1202
     COMMENT_SAVED_FAILED = 1203
-    
-    
+
+
 class DraftErrorCode:
     DRAFT_SAVE_FAILED = 1301
     DRAFT_LOAD_FAILED = 1302
@@ -121,8 +126,8 @@ class NotificationErrorCode:
     NOTIFICATION_DELETE_FAILED = 1403
     NOTIFICATION_RECEIVER_SAVE_FAILED = 1404
     NOTIFICATION_RECEIVER_LOAD_FAILED = 1405
-    
-    
+
+
 class MailErrorCode:
     MAIL_CONFIRM_FAILED = 1501
     MAIL_FORMAT_WRONG = 1502
