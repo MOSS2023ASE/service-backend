@@ -270,7 +270,7 @@ class IssueAPITestCase(APITestCase):
         return
 
     def test_comment_create(self):
-        jwt = self._student_login()
+        jwt = self._tutor_login_1()
         url = '/issue/comment/create'
         data = {
             "jwt": jwt,
