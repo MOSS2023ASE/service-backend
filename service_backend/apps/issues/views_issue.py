@@ -419,18 +419,19 @@ class IssueSearch(APIView):
             q = []
             for status in status_list:
                 q = q.union(issues.filter(status=status)) if q else issues.filter(status=status)
-            issues = issues & q
+            issues = issues.intersection(q)
+
         if chapter_list:
             q = []
             for chapter in chapter_list:
                 q = q.union(issues.filter(chapter_id=chapter)) if q else issues.filter(chapter_id=chapter)
-            issues = issues & q
+            issues = issues.intersection(q)
         elif subject_id:
             q = []
             chapters = Chapter.objects.filter(subject_id=subject_id)
             for chapter in chapters:
                 q = q.union(issues.filter(chapter=chapter)) if q else issues.filter(chapter=chapter)
-            issues = issues & q
+            issues = issues.intersection(q)
         elif year_id:
             q = []
             subjects = Subject.objects.filter(year_id=year_id)
@@ -438,13 +439,13 @@ class IssueSearch(APIView):
                 chapters = Chapter.objects.filter(subject=subject)
                 for chapter in chapters:
                     q = q.union(issues.filter(chapter=chapter)) if q else issues.filter(chapter=chapter)
-            issues = issues & q
+            issues = issues.intersection(q)
 
         if tag_list:
             q = []
             for tag in tag_list:
                 q = q.union(issues.filter(tag_id=tag)) if q else issues.filter(tag_id=tag)
-            issues = issues & q
+            issues = issues.intersection(q)
 
         if order == 0:
             issues = issues.order_by('-created_at')
