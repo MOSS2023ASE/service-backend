@@ -48,9 +48,11 @@ class IssueAPITestCase(APITestCase):
 
         year = Year(content="year")
         year.save()
+        self.year = year
 
         subject = Subject(name='subject', content='content', year=year)
         subject.save()
+        self.subject = subject
 
         user_subject = UserSubject(user=User.objects.get(student_id='20373044'), subject=subject)
         user_subject.save()
@@ -224,7 +226,9 @@ class IssueAPITestCase(APITestCase):
             "keyword": "",
             "tag_list": [],
             "status_list": [],
-            "chapter_list": [self.chapter.id],
+            "chapter_list": None,
+            "subject_id": None,
+            "year_id": self.year.id,
             "order": 3,
             "page_no": 1,
             "issue_per_page": 100

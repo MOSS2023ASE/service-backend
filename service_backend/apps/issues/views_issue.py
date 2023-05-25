@@ -429,7 +429,7 @@ class IssueSearch(APIView):
             q = []
             chapters = Chapter.objects.filter(subject_id=subject_id)
             for chapter in chapters:
-                q = q.union(issues.filter(chapter=chapter) if q else issues.filter(chapter=chapter))
+                q = q.union(issues.filter(chapter=chapter)) if q else issues.filter(chapter=chapter)
             issues = issues & q
         elif year_id:
             q = []
@@ -437,7 +437,7 @@ class IssueSearch(APIView):
             for subject in subjects:
                 chapters = Chapter.objects.filter(subject=subject)
                 for chapter in chapters:
-                    q = q.union(issues.filter(chapter=chapter) if q else issues.filter(chapter=chapter))
+                    q = q.union(issues.filter(chapter=chapter)) if q else issues.filter(chapter=chapter)
             issues = issues & q
 
         if tag_list:
