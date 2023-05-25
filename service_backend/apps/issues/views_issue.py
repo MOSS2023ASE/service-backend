@@ -5,8 +5,9 @@ from django.db.models import F
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from service_backend.apps.chapters.models import Chapter
 from service_backend.apps.chapters.views import find_chapter
-from service_backend.apps.subjects.models import UserSubject
+from service_backend.apps.subjects.models import UserSubject, Subject
 from service_backend.apps.tags.models import IssueTag, Tag
 from service_backend.apps.issues.models import Issue, LikeIssues, FollowIssues, AdoptIssues, ReviewIssues, Comment, \
     IssueApiCall
@@ -408,6 +409,8 @@ class IssueSearch(APIView):
         order = request.data['order']
         page_no = request.data['page_no']
         issue_per_page = request.data['issue_per_page']
+        year_id = request.data['year_id']
+        subject_id = request.data['subject_id']
         issues = Issue.objects.all()
         if keyword:
             issues = Issue.objects.filter(title__contains=keyword)
@@ -422,6 +425,21 @@ class IssueSearch(APIView):
             for chapter in chapter_list:
                 q = q.union(issues.filter(chapter_id=chapter)) if q else issues.filter(chapter_id=chapter)
             issues = issues & q
+        elif subject_id:
+            q = []
+            chapters = Chapter.objects.filter(subject_id=subject_id)
+            for chapter in chapters:
+                q = q.union(issues.filter(chapter=chapter) if q else issues.filter(chapter=chapter))
+            issues = issues & q
+        elif year_id:
+            q = []
+            subjects = Subject.objects.filter(year_id=year_id)
+            for subject in subjects:
+                chapters = Chapter.objects.filter(subject=subject)
+                for chapter in chapters:
+                    q = q.union(issues.filter(chapter=chapter) if q else issues.filter(chapter=chapter))
+            issues = issues & q
+
         if tag_list:
             q = []
             for tag in tag_list:
