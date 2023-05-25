@@ -105,12 +105,13 @@ class YearDelete(APIView):
 class YearCurrentUpdate(APIView):
     @_find_year()
     def post(self, request, year):
-        current_year = Year.objects.filter(is_current=True)
-        if current_year:
-            current_year.first().is_current = False
-
         try:
+            current_year = Year.objects.filter(is_current=True)
+            if current_year:
+                current_year.first().is_current = False
+                current_year.first().save()
             year.is_current = True
+            year.save()
         except Exception:
             return Response(response_json(
                 success=False,
