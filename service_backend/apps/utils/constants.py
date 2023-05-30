@@ -131,3 +131,7 @@ class NotificationErrorCode:
 class MailErrorCode:
     MAIL_CONFIRM_FAILED = 1501
     MAIL_FORMAT_WRONG = 1502
+
+
+class StatisticsErrorCode:
+    BONUS_ALL_THE_SAME = 1601
