@@ -1,13 +1,19 @@
 from datetime import date, datetime, timedelta, time
+from math import ceil
 
-from django.db.models import Q, Count
+from django.db.models import Q, Count, FloatField, F, Sum, Max, Min
+from django.db.models.functions import Cast
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from service_backend.apps.users.models import User
 from service_backend.apps.issues.models import Issue, IssueApiCall
-from service_backend.apps.users.serializers import UserSerializer
 from service_backend.apps.utils.views import response_json, encode_password, check_role
-from service_backend.apps.utils.constants import UserErrorCode, UserRole, OtherErrorCode, IssueErrorCode, DEFAULT_AVATAR
+from service_backend.apps.utils.constants import UserErrorCode, UserRole, OtherErrorCode, IssueErrorCode, \
+    DEFAULT_AVATAR, StatisticsErrorCode
+
+
+def _upper(x:float):
+    return float(ceil(2.0 * x)) / 2
 
 
 # Create your views here.
@@ -18,8 +24,8 @@ class CreateUser(APIView):
         # create user
         # print(request.data)
         student_id, name, password, role = request.data['student_id'], request.data['name'], request.data[
-                'password'], request.data['role']
-        try:    
+            'password'], request.data['role']
+        try:
             if User.objects.filter(student_id=student_id).exists():
                 user = User.objects.get(student_id=student_id)
                 user.name, user.password_digest, user.user_role = name, encode_password(password), role
@@ -193,18 +199,22 @@ class DeleteIssue(APIView):
 
 
 class GetStatistics(APIView):
+
     @check_role(UserRole.ADMIN_ONLY)
     def post(self, request, action_user: User = None):
         tp, indicator = request.data['type'], request.data['indicator']
-        begin_date, end_date = date.fromisoformat(str(request.data['begin_date']).strip()), date.fromisoformat(str(request.data['end_date']).strip())
+        begin_date, end_date = date.fromisoformat(str(request.data['begin_date']).strip()), date.fromisoformat(
+            str(request.data['end_date']).strip())
         begin_datetime, end_datetime = datetime.combine(begin_date, time.min), datetime.combine(end_date, time.max)
         res_list = []
         if indicator == 0:
-            issue_query_set = Issue.objects.all().filter(Q(counsel_at__gte=begin_datetime) & Q(counsel_at__lte=end_datetime))
+            issue_query_set = Issue.objects.all().filter(
+                Q(counsel_at__gte=begin_datetime) & Q(counsel_at__lte=end_datetime))
             if tp == 0:
                 cur_date = begin_date
                 while cur_date <= end_date:
-                    cnt = issue_query_set.filter(Q(counsel_at__gte=datetime.combine(cur_date, time.min)) & Q(counsel_at__lte=datetime.combine(cur_date, time.max))).count()
+                    cnt = issue_query_set.filter(Q(counsel_at__gte=datetime.combine(cur_date, time.min)) & Q(
+                        counsel_at__lte=datetime.combine(cur_date, time.max))).count()
                     res_list.append(cnt)
                     cur_date += timedelta(days=1)
             else:
@@ -244,5 +254,113 @@ class GetStatistics(APIView):
             message="get statistics successfully!",
             data={
                 'list': res_list
+            }
+        ))
+
+
+class GetTutorBonus(APIView):
+
+    @check_role(UserRole.ADMIN_ONLY)
+    def post(self, request, action_user: User = None):
+        bonus_per_counsel, bonus_per_review = float(request.data['bonus_per_counsel']), float(
+            request.data['bonus_per_review'])
+        begin_date, end_date = date.fromisoformat(str(request.data['begin_date']).strip()), date.fromisoformat(
+            str(request.data['end_date']).strip())
+        begin_datetime, end_datetime = datetime.combine(begin_date, time.min), datetime.combine(end_date, time.max)
+        min_bonus, max_bonus = float(request.data['min_bonus']), float(request.data['max_bonus'])
+        # statistic
+        counsel_issue = Issue.objects.all().filter(Q(counsel_at__gte=begin_datetime) & Q(counsel_at__lte=end_datetime))
+        review_issue = Issue.objects.all().filter(Q(review_at__gte=begin_datetime) & Q(review_at__lte=end_datetime))
+        counsel_count = counsel_issue.values('counselor_id').annotate(int_count=Count('counselor_id'))
+        review_count = review_issue.values('reviewer_id').annotate(int_count=Count('reviewer_id'))
+        value_dict = dict()
+        for item in counsel_count:
+            if item['counselor_id'] in value_dict:
+                value_dict[item['counselor_id']] += item['int_count'] * bonus_per_counsel
+            else:
+                value_dict[item['counselor_id']] = item['int_count'] * bonus_per_counsel
+        for item in review_count:
+            if item['reviewer_id'] in value_dict:
+                value_dict[item['reviewer_id']] += item['int_count'] * bonus_per_review
+            else:
+                value_dict[item['reviewer_id']] = item['int_count'] * bonus_per_review
+        max_value, min_value = max(value_dict.values()), min(value_dict.values())
+        # linear_projection = max_value > max_bonus or min_value < min_bonus
+        # linear_projection = linear_projection and (bonus_per_counsel >= 0.0 and bonus_per_review >= 0.0 and 0.0 <= min_bonus < max_bonus)
+        linear_projection = False
+        if linear_projection:
+            total_bonus = [{'id': k, 'bonus': (v - min_value) * (max_bonus - min_bonus) / (max_value - min_value) + min_bonus} for k, v in value_dict.items()]
+        else:
+            total_bonus = [{'id': k, 'bonus': v} for k, v in value_dict.items()]
+        # to list
+        res_list = []
+        for item in total_bonus:
+            user = User.objects.get(id=item['id'])
+            res_list.append(
+                {
+                    "id": item["id"],
+                    "student_id": user.student_id,
+                    "name": user.name,
+                    "bonus": _upper(item["bonus"])
+                }
+            )
+        return Response(response_json(
+            success=True,
+            message="get bonus list successfully!",
+            data={
+                'bonus_list': res_list
+            }
+        ))
+
+
+class GetStudentBonus(APIView):
+
+    @check_role(UserRole.ADMIN_ONLY)
+    def post(self, request, action_user: User = None):
+        bonus_per_issue = float(request.data['bonus_per_issue'])
+        begin_date, end_date = date.fromisoformat(str(request.data['begin_date']).strip()), date.fromisoformat(
+            str(request.data['end_date']).strip())
+        begin_datetime, end_datetime = datetime.combine(begin_date, time.min), datetime.combine(end_date, time.max)
+        min_bonus, max_bonus = float(request.data['min_bonus']), float(request.data['max_bonus'])
+        # statistic
+        issue_query_set = Issue.objects.all().filter(Q(created_at__gte=begin_datetime) & Q(created_at__lte=end_datetime))
+        issue_count = issue_query_set.values('user_id').annotate(int_count=Count('user_id'))
+        issue_count = issue_count.annotate(float_count=Cast('int_count', FloatField()))
+        issue_count = issue_count.annotate(count=F('float_count') * bonus_per_issue)
+        issue_count = issue_count.values('user_id', 'count')
+        issue_count = issue_count.annotate(id=F('user_id'))
+        total_value = issue_count.annotate(value=F('count'))
+        total_value = total_value.values('id', 'value')
+        max_value, min_value = total_value.aggregate(Max('value'))['value__max'], total_value.aggregate(Min('value'))['value__min']
+        if min_value == max_value:
+            return Response(response_json(
+                success=False,
+                code=StatisticsErrorCode.BONUS_ALL_THE_SAME,
+                message='volunteer time bonus all the same!'
+            ))
+        # check whether proj
+        # linear_projection = bonus_per_issue >= 0.0 and 0.0 <= min_bonus < max_bonus
+        linear_projection = False
+        if linear_projection:
+            total_bonus = total_value.annotate(bonus=F('value') * (max_bonus - min_bonus) / (max_value - min_bonus) + min_bonus).values('id', 'bonus')
+        else:
+            total_bonus = total_value.annotate(bonus=F('value')).values('id', 'bonus')
+        # to list
+        res_list = []
+        for item in total_bonus:
+            user = User.objects.get(id=item['id'])
+            res_list.append(
+                {
+                    "id": item["id"],
+                    "student_id": user.student_id,
+                    "name": user.name,
+                    "bonus": _upper(item["bonus"])
+                }
+            )
+        return Response(response_json(
+            success=True,
+            message="get bonus list successfully!",
+            data={
+                'bonus_list': res_list
             }
         ))

@@ -85,7 +85,6 @@ class AdminAPITestCase(APITestCase):
             IssueApiCall(id=7, created_at=datetime(2023, 5, 27, 23, 59, 59), user_id=4, issue_id=2),
             IssueApiCall(id=8, created_at=datetime(2023, 5, 28, 0, 0, 0), user_id=2, issue_id=3),
         ])
-        api_call_list = []
         issue_call_api = IssueApiCall.objects.get(id=1)
         issue_call_api.created_at = datetime(2023, 5, 22, 23, 59, 59)
         issue_call_api.save()
@@ -195,7 +194,7 @@ class AdminAPITestCase(APITestCase):
             'issue_id': 3,
             'jwt': jwt_token
         }
-        response = self.client.post(url, data)
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['message'], "delete issue successfully!")
         self.assertEqual(response.data['code'], 0)
@@ -224,3 +223,58 @@ class AdminAPITestCase(APITestCase):
             response = self.client.post(url, data=json.dumps(data), content_type='application/json')
             self.assertEqual(response.data['code'], 0)
             self.assertEqual(response.data['data']['list'], v)
+
+    def test_student_bonus(self):
+        Issue.objects.bulk_create([
+            Issue(id=6, title='6', content='666', user_id=2, chapter_id=1, counselor_id=4, reviewer_id=3, status=0,
+                  anonymous=0, score=0, counsel_at=datetime(2023, 5, 22, 23, 59, 59),
+                  review_at=datetime(2023, 5, 23, 0, 0, 0)),
+            Issue(id=7, title='7', content='777', user_id=2, chapter_id=1, counselor_id=3, reviewer_id=4, status=0,
+                  anonymous=0, score=0, counsel_at=datetime(2023, 5, 23, 0, 0, 0),
+                  review_at=datetime(2023, 5, 24, 0, 0, 1)),
+        ])
+        # haha
+        jwt = self._admin_login()
+        url = '/admins/student_bonus'
+        begin_date, end_date = "2023-05-23", "2040-05-27"
+        data = {
+            'issue_id': 3,
+            'bonus_per_issue': 1.4,
+            'begin_date': begin_date,
+            'end_date': end_date,
+            'max_bonus': 50,
+            'min_bonus': 0,
+            'jwt': jwt
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+        self.assertEqual(len(response.data['data']['bonus_list']), 2)
+        self.assertEqual({bonus['bonus'] for bonus in response.data['data']['bonus_list']}, {3.0, 7.0})
+
+    def test_tutor_bonus(self):
+        Issue.objects.bulk_create([
+            Issue(id=6, title='6', content='666', user_id=2, chapter_id=1, counselor_id=4, reviewer_id=3, status=0,
+                  anonymous=0, score=0, counsel_at=datetime(2023, 5, 22, 23, 59, 59),
+                  review_at=datetime(2023, 5, 23, 0, 0, 0)),
+            Issue(id=7, title='7', content='777', user_id=2, chapter_id=1, counselor_id=3, reviewer_id=4, status=0,
+                  anonymous=0, score=0, counsel_at=datetime(2023, 5, 23, 0, 0, 0),
+                  review_at=datetime(2023, 5, 24, 0, 0, 1)),
+        ])
+        # haha
+        jwt = self._admin_login()
+        url = '/admins/tutor_bonus'
+        begin_date, end_date = "2023-05-10", "2040-05-27"
+        data = {
+            'issue_id': 3,
+            'bonus_per_counsel': 1.5,
+            'bonus_per_review': 2.0,
+            'begin_date': begin_date,
+            'end_date': end_date,
+            'max_bonus': 50,
+            'min_bonus': 0,
+            'jwt': jwt
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 0)
+        self.assertEqual(len(response.data['data']['bonus_list']), 2)
+        self.assertEqual({bonus['bonus'] for bonus in response.data['data']['bonus_list']}, {12.5, 12.0})
