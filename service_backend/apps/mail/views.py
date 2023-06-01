@@ -61,7 +61,7 @@ class ConfirmMail(APIView):
         user = user.first()
 
         mail_confirm = MailConfirm.objects.filter(email=mail, vcode=vcode)
-        if not (mail_confirm and timezone.now() - mail_confirm.first().created_at < timezone.timedelta(minutes=20)):
+        if not (mail_confirm and timezone.now() - mail_confirm.first().updated_at < timezone.timedelta(minutes=20)):
             return Response(response_json(
                 success=False,
                 code=MailErrorCode.MAIL_CONFIRM_FAILED,
