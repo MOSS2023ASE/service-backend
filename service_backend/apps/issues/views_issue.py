@@ -417,7 +417,6 @@ class IssueSearch(APIView):
             keywords = jieba.cut_for_search(keywords)
             q = []
             for keyword in keywords:
-                print(keyword)
                 q = q | issues.filter(title__contains=keyword) if q else issues.filter(title__contains=keyword)
             issues = issues & q
 
