@@ -1,6 +1,7 @@
 import math
 from functools import wraps
 
+import jieba
 from django.db.models import F
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -402,7 +403,7 @@ class IssueCommit(APIView):
 class IssueSearch(APIView):
     @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user):
-        keyword = request.data['keyword']
+        keywords = request.data['keyword']
         tag_list = request.data['tag_list']
         status_list = request.data['status_list']
         chapter_list = request.data['chapter_list']
@@ -412,8 +413,12 @@ class IssueSearch(APIView):
         year_id = request.data['year_id']
         subject_id = request.data['subject_id']
         issues = Issue.objects.all()
-        if keyword:
-            issues = Issue.objects.filter(title__contains=keyword)
+        if keywords:
+            keywords = jieba.cut_for_search(keywords)
+            q = []
+            for keyword in keywords:
+                q = q | issues.filter(title__contains=keyword) if q else issues.filter(title__contains=keyword)
+            issues = issues & q
 
         if status_list:
             q = []
