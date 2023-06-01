@@ -65,7 +65,7 @@ class IssueAPITestCase(APITestCase):
         chapter = Chapter(name='chapter_2', content='content_2', subject=subject)
         chapter.save()
 
-        issue = Issue(title='问题测试', content="内容测试", user=user, chapter=self.chapter,
+        issue = Issue(title='关于数学分析中无穷级数的相关问题', content="内容测试", user=user, chapter=self.chapter,
                       status=IssueStatus.NOT_ADOPT, anonymous=0)
         issue.save()
         self.issue = issue
@@ -223,7 +223,7 @@ class IssueAPITestCase(APITestCase):
         url = '/issue/'
         data = {
             "jwt": jwt,
-            "keyword": "",
+            "keyword": "数学分析级数问题",
             "tag_list": [],
             "status_list": [],
             "chapter_list": None,
