@@ -5,19 +5,19 @@ from service_backend.apps.chapters.models import Chapter
 from rest_framework.views import APIView
 
 from service_backend.apps.subjects.models import Subject
-from service_backend.apps.utils.constants import ChapterErrorCode, SubjectErrorCode
-from service_backend.apps.utils.views import response_json
+from service_backend.apps.utils.constants import ChapterErrorCode, SubjectErrorCode, UserRole
+from service_backend.apps.utils.views import response_json, check_role
 from service_backend.apps.chapters.serializers import ChapterSerializer
 
 
 # Create your views here.
-def _find_chapter():
+def find_chapter():
     def decorated(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 chapter = Chapter.objects.get(id=args[1].data['chapter_id'])
-            except Exception as e:
+            except Exception:
                 return Response(response_json(
                     success=False,
                     code=ChapterErrorCode.CHAPTER_DOES_NOT_EXIST,
@@ -34,7 +34,7 @@ class ChapterList(APIView):
     def post(self, request):
         try:
             subject = Subject.objects.get(id=request.data['subject_id'])
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=SubjectErrorCode.SUBJECT_DOES_NOT_EXIST,
@@ -52,7 +52,7 @@ class ChapterCreate(APIView):
     def post(self, request):
         try:
             subject = Subject.objects.get(id=request.data['subject_id'])
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=SubjectErrorCode.SUBJECT_DOES_NOT_EXIST,
@@ -63,7 +63,7 @@ class ChapterCreate(APIView):
         chapter = Chapter(name=name, content=content, subject=subject)
         try:
             chapter.save()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=ChapterErrorCode.CHAPTER_SAVE_FAILED,
@@ -77,13 +77,13 @@ class ChapterCreate(APIView):
 
 
 class ChapterUpdate(APIView):
-    @_find_chapter()
+    @find_chapter()
     def post(self, request, chapter):
         chapter.name = request.data['name']
         chapter.content = request.data['content']
         try:
             chapter.save()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=ChapterErrorCode.CHAPTER_SAVE_FAILED,
@@ -97,11 +97,11 @@ class ChapterUpdate(APIView):
 
 
 class ChapterDelete(APIView):
-    @_find_chapter()
+    @find_chapter()
     def delete(self, request, chapter):
         try:
             chapter.delete()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=ChapterErrorCode.CHAPTER_DELETE_FAILED,

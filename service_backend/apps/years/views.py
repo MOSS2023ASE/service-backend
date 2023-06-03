@@ -15,7 +15,7 @@ def _find_year():
         def wrapper(*args, **kwargs):
             try:
                 year = Year.objects.get(id=args[1].data['year_id'])
-            except Exception as e:
+            except Exception:
                 return Response(response_json(
                     success=False,
                     code=YearErrorCode.YEAR_DOES_NOT_EXIST,
@@ -32,7 +32,17 @@ class YearList(APIView):
     def get(self, request):
         year = Year.objects.all()
         year_serializer = YearSerializer(year, many=True)
-        data = {"year_list": year_serializer.data}
+        data = {
+            "year_list": year_serializer.data,
+            "current_year_id": 0,
+            "current_content": ""
+        }
+
+        current_year = Year.objects.filter(is_current=True)
+        if current_year:
+            data["current_year_id"] = current_year.first().id
+            data['current_content'] = current_year.first().content
+
         return Response(response_json(
             success=True,
             data=data
@@ -44,7 +54,7 @@ class YearCreate(APIView):
         year = Year(content=request.data['content'])
         try:
             year.save()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=YearErrorCode.YEAR_SAVE_FAILED,
@@ -63,7 +73,7 @@ class YearUpdate(APIView):
         year.content = request.data['content']
         try:
             year.save()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=YearErrorCode.YEAR_SAVE_FAILED,
@@ -89,4 +99,26 @@ class YearDelete(APIView):
         return Response(response_json(
             success=True,
             message="delete year success!"
+        ))
+
+
+class YearCurrentUpdate(APIView):
+    @_find_year()
+    def post(self, request, year):
+        try:
+            current_year = Year.objects.filter(is_current=True)
+            if current_year:
+                current_year.first().is_current = False
+                current_year.first().save()
+            year.is_current = True
+            year.save()
+        except Exception:
+            return Response(response_json(
+                success=False,
+                code=YearErrorCode.YEAR_SAVE_FAILED,
+                message="can't set this year as current_year"
+            ))
+        return Response(response_json(
+            success=True,
+            message="change current year success!"
         ))

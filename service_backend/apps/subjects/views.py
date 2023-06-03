@@ -18,7 +18,7 @@ def _find_subject():
         def wrapper(*args, **kwargs):
             try:
                 subject = Subject.objects.get(id=args[1].data['subject_id'])
-            except Exception as e:
+            except Exception:
                 return Response(response_json(
                     success=False,
                     code=SubjectErrorCode.SUBJECT_DOES_NOT_EXIST,
@@ -35,7 +35,7 @@ class SubjectList(APIView):
     def post(self, request):
         try:
             year = Year.objects.get(id=request.data['year_id'])
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=YearErrorCode.YEAR_DOES_NOT_EXIST,
@@ -55,7 +55,7 @@ class SubjectCreate(APIView):
         content = request.data['content']
         try:
             year = Year.objects.get(id=request.data['year_id'])
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=YearErrorCode.YEAR_DOES_NOT_EXIST,
@@ -65,7 +65,7 @@ class SubjectCreate(APIView):
         subject = Subject(name=name, content=content, year=year)
         try:
             subject.save()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=SubjectErrorCode.SUBJECT_SAVE_FAILED,
@@ -74,7 +74,7 @@ class SubjectCreate(APIView):
         chapter = Chapter(name='未分类', content='该目录下存放未分类章节的问题。', subject=subject)
         try:
             chapter.save()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=ChapterErrorCode.CHAPTER_SAVE_FAILED,
@@ -93,7 +93,7 @@ class SubjectUpdate(APIView):
         subject.content = request.data['content']
         try:
             subject.save()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=SubjectErrorCode.SUBJECT_SAVE_FAILED,
@@ -111,7 +111,7 @@ class SubjectDelete(APIView):
     def delete(self, request, subject):
         try:
             subject.delete()
-        except Exception as e:
+        except Exception:
             return Response(response_json(
                 success=False,
                 code=SubjectErrorCode.SUBJECT_DELETE_FAILED,

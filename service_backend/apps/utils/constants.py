@@ -10,6 +10,7 @@ class UserRole:
     TUTOR = 1
     ADMIN = 2
 
+
 DEFAULT_AVATAR = "https://shieask.com/pic/default_avatar.png"
 
 
@@ -21,6 +22,11 @@ class IssueStatus:
     REVIEWING = 3
     VALID_ISSUE = 4
     INVALID_ISSUE = 5
+
+
+class NotificationCategory:
+    GLOBAL = 0
+    ISSUE = 1
 
 
 class YearErrorCode:
@@ -37,6 +43,7 @@ class UserErrorCode:
     USER_SAVE_FAILED = 205
     USER_FROZEN = 206
     PERMISSION_DENIED = 207
+    USER_LOAD_FAILED = 208
 
 
 class SubjectErrorCode:
@@ -67,6 +74,7 @@ class IssueErrorCode:
     FOLLOW_ISSUE_QUERY_FAILED = 606
     ASK_ISSUE_QUERY_FAILED = 607
     ISSUE_ACTION_REJECT = 608
+    ISSUE_RELATE_FAILED = 609
 
 
 class IssueLikeErrorCode:
@@ -87,7 +95,7 @@ class IssueTagErrorCode:
 class IssueReviewerErrorCode:
     REVIEWER_ISSUE_SAVED_FAILED = 901
 
-    
+
 class OtherErrorCode:
     UNEXPECTED_JSON_FORMAT = 1001
 
@@ -100,7 +108,30 @@ class ImageErrorCode:
     INVALID_IMAGE_FORMAT = 1105
     IMAGE_TOO_BIG = 1106
 
+
 class CommentErrorCode:
     COMMENT_NOT_FOUND = 1201
     COMMENT_DELETE_FAILED = 1202
     COMMENT_SAVED_FAILED = 1203
+
+
+class DraftErrorCode:
+    DRAFT_SAVE_FAILED = 1301
+    DRAFT_LOAD_FAILED = 1302
+
+
+class NotificationErrorCode:
+    NOTIFICATION_SAVE_FAILED = 1401
+    NOTIFICATION_LOAD_FAILED = 1402
+    NOTIFICATION_DELETE_FAILED = 1403
+    NOTIFICATION_RECEIVER_SAVE_FAILED = 1404
+    NOTIFICATION_RECEIVER_LOAD_FAILED = 1405
+
+
+class MailErrorCode:
+    MAIL_CONFIRM_FAILED = 1501
+    MAIL_FORMAT_WRONG = 1502
+
+
+class StatisticsErrorCode:
+    BONUS_ALL_THE_SAME = 1601

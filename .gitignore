@@ -1,8 +1,8 @@
 .idea
 *__pycache__/
 refresh_db.sh
-init_db.py
 env.json
 db.sqlite3
 settings_copy.py
 static
+keyword

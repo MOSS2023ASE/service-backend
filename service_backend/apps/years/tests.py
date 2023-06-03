@@ -47,3 +47,12 @@ class YearAPITestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['message'], "delete year success!")
         return
+
+    def test_current_year(self):
+        url = '/year/update_current'
+        data = {
+            "year_id": 1,
+            "content": "当前学年"
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)

@@ -1,5 +1,7 @@
+from django.db.models import Count
+
 from service_backend.apps.utils.constants import GlobalCode, UserErrorCode
-from service_backend.apps.users.models import User
+from service_backend.apps.users.models import User, BlackList
 from service_backend.apps.issues.models import Issue, ReviewIssues, AdoptIssues, LikeIssues, FollowIssues
 from service_backend.apps.years.models import Year
 from service_backend.apps.chapters.models import Chapter
@@ -31,7 +33,7 @@ def decode_jwt(token: str) -> (int, dict):
         jwt_dict = decode(jwt=token, algorithms='HS256', key=ENV['JWT_KEY'])
         start_time = datetime.fromisoformat(jwt_dict['time'])
         seconds = (datetime.now() - start_time).seconds
-        if seconds < 3600000.0:     # TODO, change to 3600 when release
+        if seconds < ENV['JWT_LIFETIME'] and not BlackList.objects.filter(token=token).exists():
             user_id = jwt_dict['user_id']
         else:
             message, code = 'expired jwt token!', UserErrorCode.EXPIRED_JWT
@@ -134,11 +136,16 @@ def init_database():
     ])
     Issue.objects.all().delete()
     Issue.objects.bulk_create([
-        Issue(title='1', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0),
-        Issue(title='2', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0),
-        Issue(title='3', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0),
-        Issue(title='4', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0),
-        Issue(title='5', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0, score=0)
+        Issue(title='1', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0,
+              score=0),
+        Issue(title='2', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0,
+              score=0),
+        Issue(title='3', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0,
+              score=0),
+        Issue(title='4', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0,
+              score=0),
+        Issue(title='5', content='123', user_id=1, chapter_id=1, counselor_id=3, reviewer_id=4, status=0, anonymous=0,
+              score=0)
     ])
     ReviewIssues.objects.all().delete()
     ReviewIssues.objects.bulk_create([
@@ -147,7 +154,6 @@ def init_database():
         ReviewIssues(user_id=1, reviewer_id=3, issue_id=5, status=0),
         ReviewIssues(user_id=1, reviewer_id=4, issue_id=4, status=0),
     ])
-
 
 # init_database()
 
