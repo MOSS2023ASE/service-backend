@@ -386,7 +386,18 @@ class UserAPITestCase(APITestCase):
         self.assertEqual(response.data['code'], 0)
         self.assertEqual(len(response.data['data']['issue_list']), 4)
 
-    def test_get_active_user(self):
+    def test_get_popular_issue3(self):
+        jwt = self._student_login_7()
+        url = '/user/get_popular_issue'
+        data = {
+            "jwt": jwt,
+            "top_k": 12
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 1002)
+        self.assertEqual(response.data['message'], 'expect top_k no more than 10!')
+
+    def test_get_active_user1(self):
         jwt6 = self._student_login_6()
         jwt7 = self._student_login_7()
         jwt8 = self._student_login_8()
@@ -457,3 +468,15 @@ class UserAPITestCase(APITestCase):
         self.assertEqual(response.data['code'], 0)
         self.assertEqual(len(response.data['data']['user_list']), 5)
         return
+
+
+    def test_get_active_user2(self):
+        jwt = self._student_login_8()
+        url = '/user/active_users'
+        data = {
+            "jwt": jwt,
+            "top_k": 12
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 1002)
+        self.assertEqual(response.data['message'], 'expect top_k no more than 10!')
