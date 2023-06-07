@@ -1,16 +1,16 @@
 from django.db.models import Count
-from django.db.models import F
 from datetime import datetime
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from service_backend.apps.issues.serializer_issue import IssueSearchSerializer
 from service_backend.apps.users.models import User, BlackList
 from service_backend.apps.subjects.models import UserSubject, Subject
 from service_backend.apps.issues.models import ReviewIssues, FollowIssues, LikeIssues, AdoptIssues, Issue
-from service_backend.apps.issues.views_issue import status_trans_permit
 from service_backend.apps.utils.views import response_json, encode_password, generate_jwt, check_role
-from service_backend.apps.utils.constants import UserErrorCode, SubjectErrorCode, IssueErrorCode, UserRole, IssueStatus
+from service_backend.apps.utils.constants import UserErrorCode, SubjectErrorCode, IssueErrorCode, UserRole, IssueStatus, \
+    OtherErrorCode
+
+top_k_max = 10
 
 
 # Create your views here.
@@ -332,6 +332,12 @@ class GetPopularIssue(APIView):
         # TODO: 可以把week扩展到month以及all time
         last_week = False
         top_k = request.data['top_k']
+        if top_k > top_k_max:
+            return Response(response_json(
+                success=False,
+                code=OtherErrorCode.TOO_LARGE_TOPK,
+                message='expect top_k no more than 10!'
+            ))
         issue_list = Issue.objects.all().filter(status=IssueStatus.VALID_ISSUE).order_by('-likes')
         if last_week:
             issue_list = [issue for issue in issue_list if
@@ -373,6 +379,12 @@ class GetActiveUser(APIView):
     def post(self, request, action_user: User = None):
         try:
             top_k = request.data['top_k']
+            if top_k > top_k_max:
+                return Response(response_json(
+                    success=False,
+                    code=OtherErrorCode.TOO_LARGE_TOPK,
+                    message='expect top_k no more than 10!'
+                ))
             user_list = User.objects.all().annotate(total_issue=Count('user_issues')).order_by('-total_issue')
             user_list = user_list[:top_k]
         except Exception as _e:

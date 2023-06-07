@@ -98,6 +98,7 @@ class IssueReviewerErrorCode:
 
 class OtherErrorCode:
     UNEXPECTED_JSON_FORMAT = 1001
+    TOO_LARGE_TOPK = 1002
 
 
 class ImageErrorCode:
