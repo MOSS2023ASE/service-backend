@@ -149,10 +149,10 @@ def init_database():
     ])
     ReviewIssues.objects.all().delete()
     ReviewIssues.objects.bulk_create([
-        ReviewIssues(user_id=1, reviewer_id=3, issue_id=1, status=0),
-        ReviewIssues(user_id=1, reviewer_id=3, issue_id=3, status=0),
-        ReviewIssues(user_id=1, reviewer_id=3, issue_id=5, status=0),
-        ReviewIssues(user_id=1, reviewer_id=4, issue_id=4, status=0),
+        ReviewIssues(user_id=3, reviewer_id=1, issue_id=1, status=0),
+        ReviewIssues(user_id=3, reviewer_id=1, issue_id=3, status=0),
+        ReviewIssues(user_id=3, reviewer_id=1, issue_id=5, status=0),
+        ReviewIssues(user_id=4, reviewer_id=1, issue_id=4, status=0),
     ])
 
 # init_database()

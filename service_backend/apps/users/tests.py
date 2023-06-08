@@ -56,11 +56,11 @@ class UserAPITestCase(APITestCase):
                   anonymous=0, score=0, likes=1)
         ])
         ReviewIssues.objects.bulk_create([
-            ReviewIssues(id=1, user_id=1, reviewed_id=3, issue_id=1, status=0),
-            ReviewIssues(id=2, user_id=1, reviewed_id=3, issue_id=3, status=0),
-            ReviewIssues(id=3, user_id=1, reviewed_id=3, issue_id=5, status=0),
-            ReviewIssues(id=4, user_id=1, reviewed_id=4, issue_id=2, status=0),
-            ReviewIssues(id=5, user_id=1, reviewed_id=4, issue_id=4, status=0),
+            ReviewIssues(id=1, user_id=3, reviewed_id=1, issue_id=1, status=0),
+            ReviewIssues(id=2, user_id=3, reviewed_id=1, issue_id=3, status=0),
+            ReviewIssues(id=3, user_id=3, reviewed_id=1, issue_id=5, status=0),
+            ReviewIssues(id=4, user_id=4, reviewed_id=1, issue_id=2, status=0),
+            ReviewIssues(id=5, user_id=4, reviewed_id=1, issue_id=4, status=0),
         ])
         AdoptIssues.objects.bulk_create([
             AdoptIssues(id=1, user_id=4, issue_id=1, status=0),
