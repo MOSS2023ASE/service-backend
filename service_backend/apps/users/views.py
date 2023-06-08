@@ -240,7 +240,7 @@ class GetReviewIssue(APIView):
     def post(self, request, action_user: User = None):
         page_no, issue_per_page = request.data['page_no'], request.data['issue_per_page']
         try:
-            issue_list = Issue.objects.filter(review_issues__reviewed=action_user.id).order_by(
+            issue_list = Issue.objects.filter(review_issues__user_id=action_user.id).order_by(
                 '-updated_at').distinct()
         except Exception as _e:
             return Response(response_json(
