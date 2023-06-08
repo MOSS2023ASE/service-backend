@@ -272,6 +272,22 @@ class UserAPITestCase(APITestCase):
         self.assertEqual(response.data['code'], 0)
         self.assertEqual(len(response.data['data']['issue_list']), 2)
 
+
+    def test_get_review_issue3(self):
+        jwt_token = self.test_login_tutor4()
+        url = '/user/get_review_issue'
+        data = {
+            "jwt": jwt_token,
+            "page_no": 1,
+            "issue_per_page": 2
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['message'], "query review issue successfully!")
+        self.assertEqual(response.data['code'], 0)
+        self.assertEqual(len(response.data['data']['issue_list']), 2)
+        self.assertEqual({issue['issue_id'] for issue in response.data['data']['issue_list']}, {2, 4})
+
     def test_get_adpot_issue1(self):
         jwt_token = self.test_login_tutor4()
         url = '/user/get_adopt_issue'
@@ -468,7 +484,6 @@ class UserAPITestCase(APITestCase):
         self.assertEqual(response.data['code'], 0)
         self.assertEqual(len(response.data['data']['user_list']), 5)
         return
-
 
     def test_get_active_user2(self):
         jwt = self._student_login_8()
