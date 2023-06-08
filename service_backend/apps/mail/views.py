@@ -22,7 +22,7 @@ class SendMail(APIView):
                 success=False,
                 code=MailErrorCode.MAIL_FORMAT_WRONG,
                 message="mail format wrong!"
-            ))
+            ), status=404)
 
         if mail_confirm:
             mail_confirm = mail_confirm.first()
@@ -57,8 +57,15 @@ class ConfirmMail(APIView):
                 success=False,
                 code=UserErrorCode.USER_NOT_FOUND,
                 message="user not found!"
-            ))
+            ), status=404)
         user = user.first()
+
+        if mail != user.mail:
+            return Response(response_json(
+                success=False,
+                code=MailErrorCode.MAIL_CONFIRM_FAILED,
+                message="student_id doesn't match mail"
+            ), status=404)
 
         mail_confirm = MailConfirm.objects.filter(email=mail, vcode=vcode)
         if not (mail_confirm and timezone.now() - mail_confirm.first().updated_at < timezone.timedelta(minutes=20)):
@@ -66,7 +73,7 @@ class ConfirmMail(APIView):
                 success=False,
                 code=MailErrorCode.MAIL_CONFIRM_FAILED,
                 message="invalid vcode!"
-            ))
+            ), status=404)
 
         user.password_digest = encode_password(password)
         try:
@@ -76,7 +83,7 @@ class ConfirmMail(APIView):
                 success=False,
                 code=UserErrorCode.USER_SAVE_FAILED,
                 message="can't change password!"
-            ))
+            ), status=404)
 
         return Response(response_json(
             success=True,
