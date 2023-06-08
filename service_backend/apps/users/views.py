@@ -201,8 +201,11 @@ class ModifyUserSubject(APIView):
 
     @check_role(UserRole.ALL_USERS)
     def post(self, request, action_user: User = None):
-        tutor_id, subject_id_list = request.data['tutor_id'], request.data['subject_id_list']
+        tutor_student_id, subject_id_list = request.data['tutor_id'], request.data['subject_id_list']
+        # print(tutor_student_id)
         try:
+            user = User.objects.get(student_id=tutor_student_id)
+            tutor_id = user.id
             UserSubject.objects.filter(user_id=tutor_id).delete()
             user_subject_list = [UserSubject(user_id=tutor_id, subject_id=subject_id)
                                  for subject_id in subject_id_list]
