@@ -8,7 +8,7 @@ from service_backend.apps.utils.views import encode_password
 
 
 # Create your tests here.
-class IssueAPITestCase(APITestCase):
+class NotificationAPITestCase(APITestCase):
     def _student_login(self):
         response = self.client.post('/user/user_login', {'student_id': '20373043', 'password': '123456'})
         return response.data['data']['jwt']
