@@ -6,7 +6,7 @@ from service_backend.apps.years.models import Year
 
 
 # Create your tests here.
-class SubjectAPITestCase(APITestCase):
+class ChapterAPITestCase(APITestCase):
     def setUp(self):
         year = Year(id=1, content="year")
         year.save()

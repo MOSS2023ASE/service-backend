@@ -11,8 +11,8 @@ def _format_addr(s):
     return formataddr((Header(name, 'utf-8').encode(), addr))
 
 
-def gen_vcode(length=4):
-    return ''.join(random.choices('0123456789', k=length))
+def gen_vcode(length=6):
+    return ''.join(random.choices('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', k=length))
 
 
 def is_valid(email) -> bool:
