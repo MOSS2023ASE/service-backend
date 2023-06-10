@@ -318,8 +318,8 @@ class IssueAPITestCase(APITestCase):
         url = '/issue/save_draft'
         data = {
             "jwt": jwt,
-            "chapter_id": self.chapter.id,
-            "title": None,
+            "chapter_id": None,
+            "title": "草稿测试",
             "content": None,
             "anonymous": None
         }
