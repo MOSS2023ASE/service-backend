@@ -229,7 +229,7 @@ class IssueAPITestCase(APITestCase):
         data = {
             "jwt": jwt,
             "keyword": "数学分析级数问题",
-            "tag_list": [],
+            "tag_list": [self.tag_1.id],
             "status_list": [],
             "chapter_list": None,
             "subject_id": None,
