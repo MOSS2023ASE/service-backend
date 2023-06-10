@@ -2,7 +2,7 @@ import math
 from functools import wraps
 
 import jieba
-from django.db.models import F
+from django.db.models import F, QuerySet
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -449,7 +449,9 @@ class IssueSearch(APIView):
         if tag_list:
             q = []
             for tag in tag_list:
-                q = q | issues.filter(tag_id=tag) if q else issues.filter(tag_id=tag)
+                issue_tags = IssueTag.objects.filter(tag_id=tag)
+                issues_for_tag = Issue.objects.filter(id__in=[issue_tag.issue.id for issue_tag in issue_tags])
+                q = q | issues_for_tag if q else issues_for_tag
             issues = issues & q
 
         if order == 0:

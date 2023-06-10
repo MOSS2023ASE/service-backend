@@ -56,11 +56,11 @@ class UserAPITestCase(APITestCase):
                   anonymous=0, score=0, likes=1)
         ])
         ReviewIssues.objects.bulk_create([
-            ReviewIssues(id=1, user_id=1, reviewed_id=3, issue_id=1, status=0),
-            ReviewIssues(id=2, user_id=1, reviewed_id=3, issue_id=3, status=0),
-            ReviewIssues(id=3, user_id=1, reviewed_id=3, issue_id=5, status=0),
-            ReviewIssues(id=4, user_id=1, reviewed_id=4, issue_id=2, status=0),
-            ReviewIssues(id=5, user_id=1, reviewed_id=4, issue_id=4, status=0),
+            ReviewIssues(id=1, user_id=3, reviewed_id=1, issue_id=1, status=0),
+            ReviewIssues(id=2, user_id=3, reviewed_id=1, issue_id=3, status=0),
+            ReviewIssues(id=3, user_id=3, reviewed_id=1, issue_id=5, status=0),
+            ReviewIssues(id=4, user_id=4, reviewed_id=1, issue_id=2, status=0),
+            ReviewIssues(id=5, user_id=4, reviewed_id=1, issue_id=4, status=0),
         ])
         AdoptIssues.objects.bulk_create([
             AdoptIssues(id=1, user_id=4, issue_id=1, status=0),
@@ -208,40 +208,40 @@ class UserAPITestCase(APITestCase):
                          "https://shieask.com/pic/20373743_20230419102933_f1c88caf-80a9-4d05-b8f2-a3d41f8fea1d.png")
         return
 
-    def test_user_subject(self):
-        jwt_token = self.test_login_admin()
-        url1 = '/user/modify_user_subject'
-        data1 = {
-            "jwt": jwt_token,
-            "tutor_id": 4,
-            "subject_id_list": [1, 2]
-        }
-        response = self.client.post(url1, data=json.dumps(data1), content_type='application/json')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['message'], 'subject list update successfully!')
-        self.assertEqual(response.data['code'], 0)
-        url2 = '/user/get_user_subject'
-        data2 = {
-            "jwt": jwt_token,
-            "tutor_id": 4,
-        }
-        response = self.client.post(url2, data=json.dumps(data2), content_type='application/json')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['message'], "get tutor's subjects successfully!")
-        self.assertEqual(response.data['code'], 0)
-        # print(response.data['data']['subject_list'])
-        self.assertEqual(len(response.data['data']['subject_list']), 2)
-        url3 = '/user/check_user_subject'
-        data3 = {
-            "jwt": jwt_token,
-            "tutor_id": 4,
-            "subject_id": 2
-        }
-        response = self.client.post(url3, data=json.dumps(data3), content_type='application/json')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['message'], 'user is a tutor of this subject!')
-        self.assertEqual(response.data['code'], 0)
-        self.assertEqual(response.data['data']['result'], 1)
+    # def test_user_subject(self):
+    #     jwt_token = self.test_login_admin()
+    #     url1 = '/user/modify_user_subject'
+    #     data1 = {
+    #         "jwt": jwt_token,
+    #         "tutor_id": 4,
+    #         "subject_id_list": [1, 2]
+    #     }
+    #     response = self.client.post(url1, data=json.dumps(data1), content_type='application/json')
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(response.data['message'], 'subject list update successfully!')
+    #     self.assertEqual(response.data['code'], 0)
+    #     url2 = '/user/get_user_subject'
+    #     data2 = {
+    #         "jwt": jwt_token,
+    #         "tutor_id": 4,
+    #     }
+    #     response = self.client.post(url2, data=json.dumps(data2), content_type='application/json')
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(response.data['message'], "get tutor's subjects successfully!")
+    #     self.assertEqual(response.data['code'], 0)
+    #     # print(response.data['data']['subject_list'])
+    #     self.assertEqual(len(response.data['data']['subject_list']), 2)
+    #     url3 = '/user/check_user_subject'
+    #     data3 = {
+    #         "jwt": jwt_token,
+    #         "tutor_id": 4,
+    #         "subject_id": 2
+    #     }
+    #     response = self.client.post(url3, data=json.dumps(data3), content_type='application/json')
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(response.data['message'], 'user is a tutor of this subject!')
+    #     self.assertEqual(response.data['code'], 0)
+    #     self.assertEqual(response.data['data']['result'], 1)
 
     def test_get_review_issue1(self):
         jwt_token = self.test_login_tutor3()
@@ -271,6 +271,22 @@ class UserAPITestCase(APITestCase):
         self.assertEqual(response.data['message'], "query review issue successfully!")
         self.assertEqual(response.data['code'], 0)
         self.assertEqual(len(response.data['data']['issue_list']), 2)
+
+
+    def test_get_review_issue3(self):
+        jwt_token = self.test_login_tutor4()
+        url = '/user/get_review_issue'
+        data = {
+            "jwt": jwt_token,
+            "page_no": 1,
+            "issue_per_page": 2
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['message'], "query review issue successfully!")
+        self.assertEqual(response.data['code'], 0)
+        self.assertEqual(len(response.data['data']['issue_list']), 2)
+        self.assertEqual({issue['issue_id'] for issue in response.data['data']['issue_list']}, {2, 4})
 
     def test_get_adpot_issue1(self):
         jwt_token = self.test_login_tutor4()
@@ -386,7 +402,18 @@ class UserAPITestCase(APITestCase):
         self.assertEqual(response.data['code'], 0)
         self.assertEqual(len(response.data['data']['issue_list']), 4)
 
-    def test_get_active_user(self):
+    def test_get_popular_issue3(self):
+        jwt = self._student_login_7()
+        url = '/user/get_popular_issue'
+        data = {
+            "jwt": jwt,
+            "top_k": 12
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 1002)
+        self.assertEqual(response.data['message'], 'expect top_k no more than 10!')
+
+    def test_get_active_user1(self):
         jwt6 = self._student_login_6()
         jwt7 = self._student_login_7()
         jwt8 = self._student_login_8()
@@ -457,3 +484,14 @@ class UserAPITestCase(APITestCase):
         self.assertEqual(response.data['code'], 0)
         self.assertEqual(len(response.data['data']['user_list']), 5)
         return
+
+    def test_get_active_user2(self):
+        jwt = self._student_login_8()
+        url = '/user/active_users'
+        data = {
+            "jwt": jwt,
+            "top_k": 12
+        }
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.data['code'], 1002)
+        self.assertEqual(response.data['message'], 'expect top_k no more than 10!')

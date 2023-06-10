@@ -191,10 +191,10 @@ class IssueReadopt(APIView):
                 message="can't readopt issue!"
             ), status=404)
 
-        reviewer_issue = ReviewIssues.objects.filter(issue=issue, user=action_user)
-        reviewer_issue.first().status = 0
-
         try:
+            reviewer_issue = ReviewIssues.objects.filter(issue=issue, user=action_user)
+            reviewer_issue.first().status = 0
+            reviewer_issue.first().save()
             issue.save()
         except Exception:
             return Response(response_json(
@@ -229,9 +229,11 @@ class IssueClassify(APIView):
                 code=OtherErrorCode.UNEXPECTED_JSON_FORMAT,
                 message="is_valid is not valid!"
             ), status=404)
-        reviewer_issue = ReviewIssues.objects.filter(issue=issue, user=action_user)
-        reviewer_issue.first().status = 1
+
         try:
+            reviewer_issue = ReviewIssues.objects.filter(issue=issue, user=action_user)
+            reviewer_issue.first().status = 1
+            reviewer_issue.first().save()
             issue.save()
         except Exception:
             return Response(response_json(

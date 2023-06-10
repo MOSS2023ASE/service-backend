@@ -332,12 +332,12 @@ class GetStudentBonus(APIView):
         total_value = issue_count.annotate(value=F('count'))
         total_value = total_value.values('id', 'value')
         max_value, min_value = total_value.aggregate(Max('value'))['value__max'], total_value.aggregate(Min('value'))['value__min']
-        if min_value == max_value:
-            return Response(response_json(
-                success=False,
-                code=StatisticsErrorCode.BONUS_ALL_THE_SAME,
-                message='volunteer time bonus all the same!'
-            ))
+        # if min_value == max_value:
+        #     return Response(response_json(
+        #         success=False,
+        #         code=StatisticsErrorCode.BONUS_ALL_THE_SAME,
+        #         message='volunteer time bonus all the same!'
+        #     ))
         # check whether proj
         # linear_projection = bonus_per_issue >= 0.0 and 0.0 <= min_bonus < max_bonus
         linear_projection = False

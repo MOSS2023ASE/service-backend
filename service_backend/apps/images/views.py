@@ -50,10 +50,9 @@ class UploadImage(APIView):
             ))
 
         image_root = os.path.join(MEDIA_ROOT)
-        image_name = action_user.student_id + '_' + datetime.now().strftime("%Y%m%d%H%M%S") + '_' + str(uuid.uuid4()) + '.' + image_type
+        # image_name = action_user.student_id + '_' + datetime.now().strftime("%Y%m%d%H%M%S") + '_' + str(uuid.uuid4()) + '.' + image_type
+        image_name = datetime.now().strftime("%Y%m%d%H%M%S") + '_' + str(uuid.uuid4()) + '.' + image_type
         image_path = os.path.join(image_root, image_name)
-        print(image_root)
-        print(image_name)
         # get file
         img_suffix = image.name.split('.')[-1]
         if image_type != ('jpeg' if img_suffix == 'jpg' else img_suffix):
