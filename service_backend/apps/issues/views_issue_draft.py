@@ -50,7 +50,8 @@ class LoadDraft(APIView):
             data["title"] = user_draft.first().title
             data["content"] = user_draft.first().content
             data["anonymous"] = user_draft.first().anonymous
-            data["subject_id"] = user_draft.first().chapter.subject_id
+            if user_draft.first().chapter_id:
+                data["subject_id"] = user_draft.first().chapter.subject_id
 
         return Response(response_json(
             success=True,
