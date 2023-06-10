@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 from service_backend.apps.chapters.models import Chapter
 from service_backend.apps.issues.models import Issue, Comment
 from service_backend.apps.subjects.models import Subject, UserSubject
-from service_backend.apps.tags.models import Tag
+from service_backend.apps.tags.models import Tag, IssueTag
 from service_backend.apps.users.models import User
 from service_backend.apps.utils.constants import IssueStatus
 from service_backend.apps.utils.views import encode_password
@@ -80,6 +80,11 @@ class IssueAPITestCase(APITestCase):
         tag = Tag(content="tag_2")
         tag.save()
         self.tag_2 = tag
+
+        issue_tag = IssueTag(issue=self.issue, tag=self.tag_1)
+        issue_tag.save()
+        issue_tag = IssueTag(issue=self.issue_2, tag=self.tag_2)
+        issue_tag.save()
 
         comment = Comment(content="comment_1", issue=issue, user=user)
         comment.save()
@@ -224,7 +229,7 @@ class IssueAPITestCase(APITestCase):
         data = {
             "jwt": jwt,
             "keyword": "数学分析级数问题",
-            "tag_list": [],
+            "tag_list": [self.tag_1.id],
             "status_list": [],
             "chapter_list": None,
             "subject_id": None,

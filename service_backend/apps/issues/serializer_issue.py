@@ -79,6 +79,7 @@ class IssueSearchSerializer(serializers.ModelSerializer):
     follow_count = serializers.SerializerMethodField()
     created_at = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
+    tag_name_list = serializers.SerializerMethodField()
 
     def get_issue_id(self, obj):
         return obj.id
@@ -134,8 +135,14 @@ class IssueSearchSerializer(serializers.ModelSerializer):
     def get_updated_at(self, obj):
         return obj.updated_at.strftime('%Y-%m-%d %H:%M:%S')
 
+    def get_tag_name_list(self, obj):
+        issue_tags = obj.issue_tags.all()
+        tags_content = [issue_tag.tag.content for issue_tag in issue_tags]
+        return tags_content
+
     class Meta:
         model = Issue
         fields = ['issue_id', 'issue_title', 'content', 'user_id', 'user_name', 'user_avatar', 'chapter_id',
                   'chapter_name', 'subject_id', 'subject_name', 'status', 'anonymous', 'score',
-                  'created_at', 'updated_at', 'counselor_id', 'reviewer_id', 'like_count', 'follow_count']
+                  'created_at', 'updated_at', 'counselor_id', 'reviewer_id', 'like_count', 'follow_count',
+                  'tag_name_list']
